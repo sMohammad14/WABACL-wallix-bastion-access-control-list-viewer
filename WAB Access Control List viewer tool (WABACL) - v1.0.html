@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAB Access Control List viewer tool (WABACL) - v1.0</title>
+    <style>
+        /* Base Color: #f27324 */
+        :root {
+            --primary-color: #f27324;
+            --light-bg: #f4f4f9;
+            --light-text: #333;
+            --dark-bg: #121212;
+            --dark-text: #e0e0e0;
+            --light-panel-bg: #fff8f0;
+            --dark-panel-bg: #1e1e1e;
+            --light-table-even: #f2f2f2;
+            --dark-table-even: #2b2b2b;
+            --light-border: #ddd;
+            --dark-border: #444;
+        }
+
+        body {
+            font-family: Tahoma, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            transition: background-color 0.3s, color 0.3s;
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+        body.dark-mode h1 {
+             color: var(--primary-color); 
+        }
+        body.dark-mode #output,
+        body.dark-mode #drop-area {
+            background-color: var(--dark-panel-bg); 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+        }
+        body.dark-mode #checkbox-controls,
+        body.dark-mode #view-mode-controls,
+        body.dark-mode #filter-controls-container,
+        body.dark-mode #unused-entities-controls /* NEW: Added Dark Mode Style */
+        {
+            background-color: var(--dark-panel-bg); 
+            color: var(--dark-text);
+            border-color: var(--dark-border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        body.dark-mode #export-instructions {
+            background-color: #2b2b2b;
+            border-color: var(--primary-color);
+            color: var(--dark-text);
+        }
+        body.dark-mode #uploaded-files-ul li {
+             background-color: #2b2b2b;
+             border-color: var(--dark-border);
+             color: var(--dark-text);
+        }
+        body.dark-mode th {
+            background-color: var(--primary-color); 
+            color: white; /* Header text is always white */
+            border-color: var(--dark-border);
+        }
+        body.dark-mode td {
+            border-color: var(--dark-border);
+        }
+        body.dark-mode tr:nth-child(even) {
+            background-color: var(--dark-table-even);
+        }
+        body.dark-mode #filter-controls div.checkbox-list,
+        body.dark-mode #unused-entities-content div.checkbox-list /* NEW: Dark mode for Unused box lists */
+        {
+            background-color: var(--dark-bg);
+            border-color: var(--dark-border);
+        }
+        body.dark-mode .error {
+            color: #ff9999;
+        }
+        body.dark-mode .info {
+            color: #90ee90;
+        }
+        
+        body.dark-mode .target-source {
+            color: #aaa;
+        }
+        body.dark-mode #output h2 {
+            border-bottom-color: #444;
+        }
+        /* End Dark Mode Styles */
+
+        /* Theme Toggle Button Styling */
+        #theme-toggle-container {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+        }
+
+        #theme-toggle-button {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        #theme-toggle-button input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        #theme-mode-toggle:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        #theme-mode-toggle:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        #theme-icon {
+             font-size: 1.2em;
+             margin-right: 8px;
+             cursor: pointer;
+             transition: color 0.3s;
+        }
+        
+        body.dark-mode #theme-icon {
+             color: white; 
+        }
+        
+        body:not(.dark-mode) #theme-icon {
+             color: #333; 
+        }
+        /* End Theme Toggle Styling */
+
+        #export-instructions {
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 0 auto 20px auto;
+            max-width: 90%;
+            background-color: var(--light-panel-bg);
+            font-size: 0.95em;
+            line-height: 1.6;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #export-instructions h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .highlight-setting {
+            color: var(--primary-color);
+            text-decoration: underline;
+            text-decoration-color: black; 
+        }
+        #drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: white;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #drop-area.highlight {
+            background-color: #ffe0c8; 
+            border-color: var(--primary-color);
+        }
+        #drop-area p {
+            margin: 0;
+            font-size: 1em;
+            color: #666;
+        }
+        body.dark-mode #drop-area p {
+            color: #ccc;
+        }
+        #drop-area input {
+            display: none;
+        }
+        #file-list {
+            margin-bottom: 15px;
+            padding: 0; 
+        }
+        #uploaded-files-ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex; 
+            flex-wrap: wrap;
+            gap: 8px 15px;
+        }
+        #uploaded-files-ul li {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 0.85em;
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow-x: visible; 
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        #output h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+            font-size: 1.3em;
+            transition: border-bottom-color 0.3s;
+        }
+
+        #control-panel-wrapper {
+            border: none;
+            padding: 0;
+            margin-bottom: 20px;
+            background-color: transparent;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        #control-panel-wrapper h2 {
+            color: var(--primary-color);
+            border-bottom: none; 
+            padding-bottom: 0;
+            margin-bottom: 8px;
+            margin-top: 0; 
+            font-size: 1.1em;
+        }
+
+        #checkbox-controls, 
+        #view-mode-controls, 
+        #filter-controls-container,
+        #unused-entities-controls /* NEW: Added Unused Entities Container */
+        {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: var(--light-panel-bg); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            direction: ltr;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #view-mode-controls { min-width: 180px; }
+        #checkbox-controls { min-width: 230px; }
+        #filter-controls-container { flex-grow: 1; }
+        #unused-entities-controls { min-width: 250px; } /* NEW: Styled unused panel */
+        
+        #view-mode-options, #target-source-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+        /* NEW: Vertical layout for optional columns */
+        #checkbox-options {
+            display: flex;
+            flex-direction: column; 
+            gap: 8px;
+        }
+        /* END NEW */
+
+        #view-mode-options label, #checkbox-options label, #target-source-options label {
+            display: flex;
+            align-items: center;
+            font-size: 0.85em;
+            cursor: pointer;
+        }
+
+        #filter-controls, 
+        #unused-entities-content /* NEW: Apply flex layout to unused content */
+        {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        #filter-controls > div,
+        #unused-entities-content > div /* NEW: Apply column style to inner divs */
+        {
+            display: flex;
+            flex-direction: column;
+            min-width: 140px;
+        }
+        
+        #filter-controls div.checkbox-list,
+        #unused-entities-content div.checkbox-list /* NEW: Apply list style to unused content */
+        {
+            max-height: 190px;
+            min-height: 190px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: white;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode #filter-controls div.checkbox-list,
+        body.dark-mode #unused-entities-content div.checkbox-list
+        {
+            background-color: var(--dark-bg);
+            border-color: var(--dark-border);
+        }
+
+        #filter-controls label.filter-item {
+            display: block; 
+            font-size: 0.85em;
+            padding: 2px 0;
+            cursor: pointer;
+        }
+        
+        #unused-entities-content > div > label {
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        /* NEW: Style for items inside the unused list - no checkboxes needed */
+        #unused-entities-content div.checkbox-list div {
+             font-size: 0.85em;
+             padding: 2px 0;
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+        }
+
+
+        #sticky-scroll-wrapper {
+            overflow-x: auto;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        table {
+            width: auto;
+            min-width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            direction: ltr;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+            white-space: nowrap; 
+            font-size: 0.9em;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+        }
+        
+        /* MODIFIED: Row Index Style Adjustment */
+        th.row-index-col, td.row-index-col {
+            text-align: center;
+            width: 1%;
+            font-weight: bold;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+        th.row-index-col { 
+        }
+        td.row-index-col { 
+            color: #555; 
+        }
+        body.dark-mode th.row-index-col, body.dark-mode td.row-index-col {
+            color: #eee;
+        }
+        /* END MODIFIED */
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer; 
+            user-select: none; 
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+            transition: background-color 0.3s;
+        }
+        
+        /* MODIFIED: Ensure text color is always #333 (dark) on light backgrounds */
+        .color-negative { background-color: #F08080; color: #333 !important; } 
+        .color-positive { background-color: #90EE90; color: #333 !important; } 
+        
+        .error { color: red; font-weight: bold; margin-bottom: 15px; }
+        .info { color: green; font-weight: bold; margin-bottom: 15px; }
+        .target-source {
+            font-size: 0.75em;
+            color: #888;
+            margin-left: 5px;
+        }
+        
+        .footer-link-container {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            transition: border-top-color 0.3s;
+        }
+        body.dark-mode .footer-link-container {
+            border-top-color: var(--dark-border);
+        }
+        .footer-link-container a {
+            color: var(--primary-color);
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        
+        #row-count-display {
+             text-align: right;
+             font-weight: bold;
+             margin-top: 10px;
+             padding: 5px 0;
+             border-top: 1px solid #ddd;
+             font-size: 1em;
+        }
+        body.dark-mode #row-count-display {
+            border-top-color: var(--dark-border);
+        }
+
+        /* Sorting Icons (Modified for No. column) */
+        th .sort-indicator {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 5px;
+            font-weight: normal;
+        }
+        th .sortable-icon {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 5px;
+            vertical-align: middle;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid white; 
+            opacity: 0.6;
+        }
+        th .sort-index {
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            padding: 0 4px;
+            font-size: 0.75em;
+            margin-right: 5px;
+            line-height: 1.5;
+            min-width: 13px;
+            text-align: center;
+        }
+        th .sort-icon {
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid white;
+        }
+        th.desc .sort-icon {
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid white;
+            border-bottom: none;
+        }
+        th.asc .sortable-icon,
+        th.desc .sortable-icon {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="theme-toggle-container">
+        <span id="theme-icon" onclick="document.getElementById('theme-mode-toggle').click();">🌙</span>
+        <label id="theme-toggle-button">
+            <input type="checkbox" id="theme-mode-toggle" onchange="handleThemeChange()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <h1>WAB Access Control List viewer tool (WABACL) - v1.0</h1>
+    
+    <div id="export-instructions">
+        <h3>Required Export Instructions</h3>
+        <p>Please export the following 5 files in <strong>CSV</strong> format from the <strong>Left Menu>Import/Export>CSV</strong> path: <strong>✅Target groups</strong>, <strong>✅User groups</strong>, <strong>✅Users</strong>, <strong>✅Devices</strong>, and <strong>✅Authorizations</strong>. (You may export all of them together and extract them from the zip file).</p>
+        <p style="font-weight: bold;">
+            <span style="color: var(--primary-color);">Important Note:</span> Ensure the export settings are configured as follows: 
+            <span class="highlight-setting">✅Field separator must be set to SEMICOLON (;)</span> and the <span class="highlight-setting">✅List separator must be set to COMMA (,)</span>.
+        </p>
+    </div>
+    <div id="drop-area">
+        <p>Drag and Drop files here or click to select.</p>
+        <input type="file" id="fileElem" multiple accept=".csv" style="display: none;">
+    </div>
+
+    <div id="file-list">
+        <ul id="uploaded-files-ul"></ul>
+    </div>
+
+    <div id="output">
+        
+        <div id="control-panel-container" style="display: none;">
+        
+            <div id="control-panel-wrapper">
+                
+                <div id="view-mode-controls">
+                     <h2>View Settings</h2>
+                     
+                     <div style="border-bottom: 1px dashed var(--light-border); padding-bottom: 8px;">
+                        <label style="font-weight: bold; font-size: 0.95em;">Data Grouping:</label>
+                         <div id="view-mode-options">
+                             <label><input type="radio" name="viewMode" value="user" checked onchange="handleViewModeChange()"> Group by User</label>
+                             <label><input type="radio" name="viewMode" value="target" onchange="handleViewModeChange()"> Group by Target/Resource</label>
+                         </div>
+                     </div>
+                     
+                     <div style="padding-top: 8px; border-bottom: 1px dashed var(--light-border); padding-bottom: 8px;">
+                        <label style="font-weight: bold; font-size: 0.95em;">Target Source Display:</label>
+                        <div id="target-source-options">
+                            <label><input type="radio" name="targetSourceMode" value="integrated" checked onchange="handleViewModeChange()"> Integrated</label>
+                            <label><input type="radio" name="targetSourceMode" value="separate" onchange="handleViewModeChange()"> Access Type Column</label>
+                            <label><input type="radio" name="targetSourceMode" value="hide" onchange="handleViewModeChange()"> Hide</label>
+                        </div>
+                     </div>
+                     
+                </div>
+                
+                <div id="filter-controls-container">
+                    <h2>Data Filters</h2>
+                    <div id="filter-controls">
+                    </div>
+                </div>
+
+                <div id="unused-entities-controls">
+                    <h2>Orphaned Entities</h2>
+                    <div id="unused-entities-content">
+                        </div>
+                </div>
+                <div id="checkbox-controls">
+                    <h2>Optional Columns</h2>
+                    <div id="checkbox-options">
+                    </div>
+                </div>
+
+            </div>
+            
+            <h2>Access Table</h2>
+            <div id="sticky-scroll-wrapper">
+                <div id="result-table"></div>
+            </div>
+            <div id="row-count-display"></div>
+            
+        </div>
+        
+    </div>
+    
+    <div class="footer-link-container">
+        by <a href="https://github.com/sMohammad14" target="_blank">sMohammad14</a>
+    </div>
+
+    <script>
+        // --- Data storage for all parsed files ---
+        let allData = {
+            auth: [],
+            resource: [],
+            targetsgroup: [],
+            usersgroup: [],
+            user: [],
+            errors: [],
+            unused: { users: [], hosts: [], targets: [] } // NEW: Store unused entities
+        };
+        
+        // --- Column definitions and ordering ---
+        const ACCESS_TYPE_HEADER = "Access Type"; 
+        const ROW_INDEX_HEADER = "No"; 
+        const _ORIGINAL_INDEX_KEY = "_ORIGINAL_INDEX_"; 
+        
+        const FIXED_COLUMNS_BY_USER = [
+            "Username",
+            "Target/Resource",
+            "Host IP",
+            "Authorization Name",
+            "Targetgroup",
+            "Usergroup"
+        ];
+        
+        const FIXED_COLUMNS_BY_TARGET = [
+            "Target/Resource",
+            "Host IP",
+            "Username",
+            "Authorization Name",
+            "Targetgroup",
+            "Usergroup"
+        ];
+        
+        const TOGGLEABLE_AUTH_HEADERS = [
+            "Recorded",
+            "Critical",
+            "Require approval",
+            "Approver groups",
+            "Approvers",
+            "Sub-protocols"
+        ];
+        
+        // Stores the complete, non-sorted, raw list of access entries
+        let rawAccessList = [];
+        
+        // Array to store multi-level sort criteria: [{header: string, direction: 1 or -1}]
+        let sortCriteria = []; 
+
+        // --- File Type Mapping for Display ---
+        const FILE_TYPE_MAPPING = {
+            auth: "Authorization",
+            resource: "Resource",
+            targetsgroup: "Targets Group",
+            user: "User"
+        };
+
+        // --- Required Headers for File Type Detection ---
+        const REQUIRED_HEADERS = {
+            auth: ["Usergroup name", "Targetgroup name", "Critical"],
+            resource: ["Host", "Alias"],
+            targetsgroup: ["Scenario"],
+            usersgroup: ["Timeframes"],
+            user: ["Full name"]
+        };
+        
+        // --- Filter Keys in Desired Order (User Request) ---
+        const FILTER_KEYS_ORDER = [
+             "Username",
+             "Target/Resource",
+             "Host IP",
+             "Authorization Name",
+             "Targetgroup",
+             "Usergroup"
+        ];
+        
+        // --- DOM Elements (Declared globally, assigned in DOMContentLoaded) ---
+        let dropArea;
+        let fileElem;
+        let fileListUL;
+        let controlPanelContainerDiv; 
+        let resultTableDiv;
+        let checkboxOptionsDiv;
+        let viewModeOptionsDiv;
+        let filterControlsDiv;
+        let exportInstructionsDiv;
+        let rowCountDisplay;
+        let unusedEntitiesControlsDiv; // NEW: Unused Entities DOM element
+        let unusedEntitiesContentDiv;  // NEW: Unused Entities Content DOM element
+
+        // --- Helper: Clean header name for use in CSS ---
+        function sanitizeHeaderForCSS(header) {
+            return header.replace(/ /g, '_');
+        }
+        
+        // --- Helper: Convert boolean/empty values for display and determine color class ---
+        function formatValueAndGetClass(header, value) {
+            let displayValue;
+            let colorClass = '';
+            
+            if (value === null || value === undefined || value.toString().trim() === '') {
+                displayValue = 'N/A';
+            } else {
+                const upperValue = value.toString().trim().toUpperCase();
+                
+                if (header === "Recorded") {
+                    if (upperValue === 'TRUE') {
+                        displayValue = 'Recorded';
+                        colorClass = 'color-positive';
+                    } else if (upperValue === 'FALSE') {
+                        displayValue = 'Not Record';
+                        colorClass = 'color-negative';
+                    } else {
+                        displayValue = value;
+                    }
+                } else if (header === "Critical") {
+                    if (upperValue === 'TRUE') {
+                        displayValue = 'Critical';
+                        colorClass = 'color-positive';
+                    } else if (upperValue === 'FALSE') {
+                        displayValue = 'Not Critical';
+                        colorClass = 'color-negative';
+                    } else {
+                        displayValue = value;
+                    }
+                } else if (header === "Require approval") {
+                    if (upperValue === 'TRUE') {
+                        displayValue = 'Require approval';
+                        colorClass = 'color-positive';
+                    } else if (upperValue === 'FALSE') {
+                        displayValue = 'Not Require approval';
+                        colorClass = 'color-negative';
+                    } else {
+                        displayValue = value;
+                    }
+                } else {
+                    displayValue = value;
+                }
+            }
+            
+            return { displayValue, colorClass };
+        }
+
+        // --- Main file processing logic ---
+        function handleFiles(files) {
+            console.log('--- File Processing Started (handleFiles) ---');
+            
+            allData = { auth: [], resource: [], targetsgroup: [], usersgroup: [], user: [], errors: [], unused: { users: [], hosts: [], targets: [] } };
+            rawAccessList = [];
+            sortCriteria = [];
+            exportInstructionsDiv.style.display = 'none';
+            fileListUL.innerHTML = '';
+            
+            resultTableDiv.innerHTML = '<p class="info">Processing files. Please wait...</p>'; 
+            controlPanelContainerDiv.style.display = 'none'; 
+
+            rowCountDisplay.innerHTML = ''; 
+
+            const filesArray = Array.from(files);
+            const totalFiles = filesArray.length;
+            console.log(`Total files received: ${totalFiles}. Must be 5.`);
+
+            if (totalFiles !== 5) {
+                const message = `Error: Exactly 5 files (Auth, Resource, TargetGroup, UserGroup, User) must be uploaded. ${totalFiles} files received.`;
+                resultTableDiv.innerHTML = `<p class="error">${message}</p>`;
+                exportInstructionsDiv.style.display = 'block'; 
+                console.error(message);
+                return;
+            }
+
+            let filesProcessed = 0;
+            
+            filesArray.forEach(file => {
+                let listItem = document.createElement('li');
+                listItem.textContent = `File: ${file.name} (Reading...)`;
+                fileListUL.appendChild(listItem); 
+
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    console.log(`File ${file.name} loaded successfully. Starting CSV parse.`);
+                    parseCSV(e.target.result, file.name, listItem);
+                    filesProcessed++;
+                    if (filesProcessed === totalFiles) {
+                         console.log('All files loaded. Starting checkAndAnalyze.');
+                         checkAndAnalyze();
+                    }
+                };
+                
+                reader.onerror = (e) => {
+                    const errorMsg = `File ${file.name}: Error reading file: ${e.target.error.name}`;
+                    allData.errors.push(errorMsg);
+                    listItem.textContent = `File: ${file.name} [Error: Read Failed]`;
+                    listItem.style.color = 'red';
+                    console.error('ERROR in reader.onerror:', e.target.error);
+                    filesProcessed++;
+                    if (filesProcessed === totalFiles) {
+                        console.log('All files loaded (with errors). Starting checkAndAnalyze.');
+                        checkAndAnalyze(); 
+                    }
+                };
+                
+                reader.readAsText(file, 'UTF-8');
+            });
+        }
+
+        // --- Parse CSV content and detect file type ---
+        function parseCSV(text, fileName, listItem) {
+            try {
+                const allLines = text.trim().split(/\r?\n/).filter(line => line.trim());
+
+                if (allLines.length < 2) { 
+                    const message = `File ${fileName}: Insufficient content.`;
+                    allData.errors.push(message);
+                    listItem.textContent = `File: ${fileName} [Error: Insufficient content]`;
+                    listItem.style.color = 'red';
+                    console.error(`ERROR in parseCSV (${fileName}): ${message}`);
+                    return;
+                }
+
+                // Check for the header line which usually starts with # or is the second line
+                let headerLineIndex = allLines.findIndex(line => line.includes('Name') || line.includes('Usergroup'));
+                if (headerLineIndex === -1 || headerLineIndex === 0) {
+                     headerLineIndex = 1; // Fallback to the second line
+                }
+                if (allLines.length <= headerLineIndex) {
+                    const message = `File ${fileName}: Could not find a valid header line.`;
+                    allData.errors.push(message);
+                    listItem.textContent = `File: ${fileName} [Error: No headers found]`;
+                    listItem.style.color = 'red';
+                    console.error(`ERROR in parseCSV (${fileName}): ${message}`);
+                    return;
+                }
+
+                const rawHeaders = allLines[headerLineIndex].replace(/^#/, '').split(';');
+                const headers = rawHeaders.map(h => h.trim()).filter(h => h);
+                
+                let fileType = null;
+                for (const type in REQUIRED_HEADERS) {
+                    if (REQUIRED_HEADERS[type].every(h => headers.includes(h))) {
+                        fileType = type;
+                        break;
+                    }
+                }
+
+                if (!fileType) {
+                    const message = `File ${fileName}: File type could not be determined. Check Field separator is SEMICOLON (;). Found headers: ${headers.join(', ')}`;
+                    allData.errors.push(message);
+                    listItem.textContent = `File: ${fileName} [Error: Unknown type]`;
+                    listItem.style.color = 'red';
+                    console.error(`ERROR in parseCSV (${fileName}): ${message}`);
+                    return;
+                }
+
+                const displayType = FILE_TYPE_MAPPING[fileType];
+                listItem.textContent = `File: ${fileName} (Type: ${displayType})`;
+                listItem.style.color = 'green';
+                console.log(`File ${fileName} detected as ${fileType} (${displayType}). Total data rows: ${allLines.length - (headerLineIndex + 1)}`);
+
+                for (let i = headerLineIndex + 1; i < allLines.length; i++) {
+                    if (allLines[i].startsWith('#') || !allLines[i].trim()) continue; 
+
+                    const values = allLines[i].split(';');
+                    
+                    if (values.length !== headers.length) {
+                        continue; 
+                    }
+
+                    let row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index].trim();
+                    });
+                    allData[fileType].push(row);
+                }
+                console.log(`Parsed ${allData[fileType].length} rows for type ${fileType}.`);
+            } catch (error) {
+                const errorMessage = `Fatal error during parsing ${fileName}: ${error.message}`;
+                allData.errors.push(errorMessage);
+                listItem.textContent = `File: ${fileName} [Error: Parsing Failed]`;
+                listItem.style.color = 'red';
+                console.error(errorMessage, error);
+            }
+        }
+
+        // --- Helper: Extract Resource Name from a full Target string ---
+        function extractResourceName(target) {
+            let resourceIdentifier = target;
+            resourceIdentifier = resourceIdentifier.includes(':') ? resourceIdentifier.split(':')[0] : resourceIdentifier;
+            resourceIdentifier = resourceIdentifier.includes('@') ? resourceIdentifier.split('@').pop() : resourceIdentifier;
+            
+            return resourceIdentifier;
+        }
+
+        // --- Check file completeness and start analysis ---
+        function checkAndAnalyze() {
+            console.log('--- Check and Analyze Started ---');
+            const fileTypes = Object.keys(REQUIRED_HEADERS);
+            const allFilesRead = fileTypes.every(type => allData[type].length > 0);
+            
+            console.log(`All files successfully read (data presence): ${allFilesRead}`);
+            console.log(`Errors found during parse: ${allData.errors.length}`);
+            
+            if (allData.errors.length > 0) {
+                resultTableDiv.innerHTML = `<p class="error">The following errors occurred while reading files:</p><ul>${allData.errors.map(err => `<li>${err}</li>`).join('')}</ul>`;
+                controlPanelContainerDiv.style.display = 'none';
+                exportInstructionsDiv.style.display = 'block';
+                rowCountDisplay.innerHTML = '';
+                console.error('CheckAndAnalyze FAILED due to parsing errors.');
+            } else if (allFilesRead) {
+                resultTableDiv.innerHTML = '';
+                console.log('CheckAndAnalyze SUCCESS. Starting analyzeAccess.');
+                analyzeAccess();
+                setupFilters();
+                setupUnusedFilters(); // NEW: Call setup for unused entities
+                controlPanelContainerDiv.style.display = 'block';
+            } else {
+                 const missingFiles = fileTypes.filter(type => allData[type].length === 0).map(type => FILE_TYPE_MAPPING[type]);
+                 const message = `Error: One of the mandatory files is either empty or was not correctly identified. Missing data for: ${missingFiles.join(', ')}`;
+                 resultTableDiv.innerHTML = `<p class="error">${message}</p>`;
+                 controlPanelContainerDiv.style.display = 'none';
+                 exportInstructionsDiv.style.display = 'block'; 
+                 rowCountDisplay.innerHTML = '';
+                 console.error('CheckAndAnalyze FAILED: Missing essential data.', missingFiles);
+            }
+        }
+        
+        // Custom comparison logic for sorting 
+        function customSortLogic(a, b, header, direction) {
+            
+            // Handle original index for stable sort fallback
+            if (header === ROW_INDEX_HEADER) {
+                const numA = parseInt(a[_ORIGINAL_INDEX_KEY]); // Use internal key
+                const numB = parseInt(b[_ORIGINAL_INDEX_KEY]); // Use internal key
+                if (numA < numB) return -1 * direction;
+                if (numA > numB) return 1 * direction;
+                return 0;
+            }
+            
+            // Convert to string safely before calling toLowerCase()
+            let valA = (String(a[header] || '')).toLowerCase();
+            let valB = (String(b[header] || '')).toLowerCase();
+
+            if (header === ACCESS_TYPE_HEADER) {
+                valA = (a.TargetSource || '').toLowerCase();
+                valB = (b.TargetSource || '').toLowerCase();
+            }
+            
+            const isEmptyA = valA === '';
+            const isEmptyB = valB === '';
+
+            if (isEmptyA && isEmptyB) return 0;
+            
+            if (isEmptyA) return 1 * direction; 
+            if (isEmptyB) return -1 * direction; 
+
+            if (valA < valB) return -1 * direction;
+            if (valA > valB) return 1 * direction;
+            
+            return 0;
+        }
+
+
+        // --- Main analysis function ---
+        function analyzeAccess() {
+            console.log('--- Access Analysis Started (analyzeAccess) ---');
+            const { auth, targetsgroup, user, usersgroup, resource } = allData;
+            rawAccessList = [];
+
+            // Mapping logic (omitted for brevity, assume correct)
+            const resourceMap = new Map();
+            resource.forEach(r => resourceMap.set(r.Name, r.Host));
+
+            const userGroupsMap = new Map();
+            usersgroup.forEach(ug => {
+                 if (ug.Users) {
+                    userGroupsMap.set(ug.Name, ug.Users.split(',').map(u => u.trim()).filter(u => u));
+                 }
+            });
+
+            const userToGroupsMap = new Map();
+            user.forEach(u => {
+                const groups = u.Groups ? u.Groups.split(',').map(g => g.trim()).filter(g => g) : [];
+                userToGroupsMap.set(u.Username, groups);
+            });
+            
+            const targetGroupMap = new Map();
+            const targetFields = ["Target accounts", "Account mapping", "Interactive login", "Accounts", "Scenario"];
+
+            targetsgroup.forEach(tg => {
+                const sourcedTargets = [];
+                targetFields.forEach(field => {
+                    if (tg[field]) {
+                        const rawTargets = tg[field].split(',').map(t => t.trim()).filter(t => t);
+                        rawTargets.forEach(target => {
+                            sourcedTargets.push({ 
+                                target: target, 
+                                source: field 
+                            });
+                        });
+                    }
+                });
+                targetGroupMap.set(tg.Name, sourcedTargets); 
+            });
+
+
+            auth.forEach(a => {
+                const userGroupName = a['Usergroup name'];
+                const targetGroupName = a['Targetgroup name'];
+                const approverGroupsStr = a['Approver groups'];
+
+                let authorizedUsernames = [];
+                
+                user.forEach(u => {
+                    const groups = userToGroupsMap.get(u.Username) || [];
+                    if (groups.includes(userGroupName)) {
+                        authorizedUsernames.push(u.Username);
+                    }
+                });
+                const directUsers = userGroupsMap.get(userGroupName) || [];
+                authorizedUsernames = Array.from(new Set([...authorizedUsernames, ...directUsers]));
+
+                const finalUsernames = authorizedUsernames.length > 0 ? authorizedUsernames : [""];
+                
+                const fullSourcedTargetsInGroup = targetGroupMap.get(targetGroupName) || [];
+                let finalSourcedTargets;
+
+                if (fullSourcedTargetsInGroup.length === 0) {
+                    finalSourcedTargets = [{ 
+                        target: "", 
+                        source: "" 
+                    }];
+                } else {
+                    finalSourcedTargets = fullSourcedTargetsInGroup;
+                }
+
+                let approverUsernames = [];
+                if (approverGroupsStr && approverGroupsStr !== '-1' && approverGroupsStr.toLowerCase() !== 'none') {
+                    const approverGroups = approverGroupsStr.split(',').map(g => g.trim()).filter(g => g);
+
+                    user.forEach(u => {
+                        const username = u.Username;
+                        
+                        const groupsInUserFile = userToGroupsMap.get(username) || [];
+                        const isMemberViaUserFile = groupsInUserFile.some(g => approverGroups.includes(g));
+
+                        const isMemberViaUserGroupFile = approverGroups.some(g => {
+                            const users = userGroupsMap.get(g) || [];
+                            return users.includes(username);
+                        });
+
+                        if (isMemberViaUserFile || isMemberViaUserGroupFile) {
+                            approverUsernames.push(username);
+                        }
+                    });
+
+                    approverUsernames = Array.from(new Set(approverUsernames.filter(u => u))).sort();
+                }
+                const approversList = approverUsernames.join(', ');
+
+
+                finalUsernames.forEach(username => {
+                    finalSourcedTargets.forEach(sourcedTarget => {
+                        const fullTargetString = sourcedTarget.target;
+                        const targetSource = sourcedTarget.source; 
+
+                        const isNoTarget = fullTargetString === "";
+                        const resourceName = isNoTarget ? '' : extractResourceName(fullTargetString);
+                        const host = resourceName ? resourceMap.get(resourceName) : '';
+                        
+                        let row = {};
+
+                        row["Username"] = username;
+                        row["Target/Resource"] = fullTargetString;
+                        row["TargetSource"] = targetSource; 
+                        row["Host IP"] = host || ''; 
+                        row["Authorization Name"] = a.Name;
+                        row["Targetgroup"] = targetGroupName;
+                        row["Usergroup"] = userGroupName;
+
+                        TOGGLEABLE_AUTH_HEADERS.forEach(h => {
+                            if (h === "Approvers") {
+                                row[h] = approversList;
+                            } else {
+                                row[h] = a[h] || ''; 
+                            }
+                        });
+                        
+                        rawAccessList.push(row);
+                    });
+                });
+            });
+            
+            // Assign a stable index for sorting fallback, but *not* for display
+            rawAccessList.forEach((row, index) => {
+                 row[_ORIGINAL_INDEX_KEY] = index + 1; // Assign to internal key
+            });
+
+
+            rawAccessList.sort((a, b) => {
+                return customSortLogic(a, b, "Username", 1);
+            });
+
+
+            if (rawAccessList.length === 0) {
+                resultTableDiv.innerHTML = '<p class="info">No access entries found based on input files.</p>';
+                controlPanelContainerDiv.style.display = 'none';
+                rowCountDisplay.innerHTML = '';
+                console.warn('analyzeAccess completed, but rawAccessList is empty.');
+                return;
+            }
+
+            // --- NEW: Calculate Unused Entities ---
+            const allUsers = new Set(allData.user.map(u => u.Username).filter(u => u));
+            const accessedUsers = new Set(rawAccessList.map(r => r.Username).filter(u => u));
+            const unusedUsers = Array.from(allUsers).filter(u => !accessedUsers.has(u)).sort();
+            
+            const allResources = new Set(allData.resource.map(r => r.Name).filter(n => n));
+            const accessedResourceNames = new Set(
+                rawAccessList
+                    .map(r => extractResourceName(r["Target/Resource"]))
+                    .filter(n => n)
+            );
+            const unusedResources = Array.from(allResources).filter(n => !accessedResourceNames.has(n)).sort();
+            
+            const allHosts = new Set(allData.resource.map(r => r.Host).filter(h => h));
+            const accessedHosts = new Set(rawAccessList.map(r => r["Host IP"]).filter(h => h));
+            const unusedHosts = Array.from(allHosts).filter(h => !accessedHosts.has(h)).sort();
+            
+            allData.unused = {
+                users: unusedUsers,
+                hosts: unusedHosts,
+                targets: unusedResources
+            };
+            // --- END NEW ---
+
+
+            console.log(`Raw access list created with ${rawAccessList.length} entries.`);
+            setupCheckboxes();
+            
+            console.log('--- Access Analysis Finished. Calling reRenderTableWithFilters. ---');
+            reRenderTableWithFilters();
+        }
+        
+        // --- Setup Filter Dropdowns (Checkboxes) ---
+        function setupFilters() {
+            console.log('Setting up filter controls.');
+            filterControlsDiv.innerHTML = '';
+
+            const uniqueValuesMap = {
+                "Target/Resource": extractUniqueValues(rawAccessList, "Target/Resource"),
+                "Username": extractUniqueValues(rawAccessList, "Username"),
+                "Host IP": extractUniqueValues(rawAccessList, "Host IP"),
+                "Authorization Name": extractUniqueValues(rawAccessList, "Authorization Name"),
+                "Targetgroup": extractUniqueValues(rawAccessList, "Targetgroup"),
+                "Usergroup": extractUniqueValues(rawAccessList, "Usergroup")
+            };
+            
+            function createCheckboxGroup(key, uniqueValues) {
+                const control = document.createElement('div');
+                control.innerHTML = `<label>Filter by ${key}:</label>`;
+                const checkboxList = document.createElement('div');
+                checkboxList.classList.add('checkbox-list'); 
+                checkboxList.id = `${key.toLowerCase().replace(/ /g, '-')}-filter-list`;
+
+                uniqueValues.forEach(value => {
+                    let displayValue = value;
+                    let colorStyle = ''; 
+                    
+                    let filterValue = value;
+                    if (value === 'No Host IP' || value === 'No User in Group' || value === 'No Target in Group') {
+                        filterValue = ''; 
+                        const shouldBeRed = (key === "Target/Resource" || key === "Host IP" || key === "Username");
+                        if (shouldBeRed) {
+                            colorStyle = 'style="color: red; font-weight: bold;"'; 
+                        }
+                    }
+                    
+                    const label = document.createElement('label');
+                    label.classList.add('filter-item');
+                    label.innerHTML = `
+                        <input type="checkbox" data-filter-value="${filterValue}" 
+                               data-filter-key="${key}" onchange="reRenderTableWithFilters()"> 
+                        <span ${colorStyle}>${displayValue}</span>
+                    `;
+                    checkboxList.appendChild(label);
+                });
+
+                control.appendChild(checkboxList);
+                return control;
+            }
+
+            FILTER_KEYS_ORDER.forEach(key => {
+                 const control = createCheckboxGroup(key, uniqueValuesMap[key]);
+                 filterControlsDiv.appendChild(control);
+            });
+        }
+        
+        // --- NEW: Setup Unused Entities Display Boxes - CHANGED TO ENGLISH ---
+        function setupUnusedFilters() {
+            console.log('Setting up unused entities controls.');
+            unusedEntitiesContentDiv.innerHTML = '';
+            
+            const unusedData = allData.unused;
+            
+            const config = [
+                 { key: 'users', title: 'Users with No Access' },
+                 { key: 'hosts', title: 'Host IPs with No Access', sourceKey: 'Host' },
+                 { key: 'targets', title: 'Targets with No Access', sourceKey: 'Alias' }
+            ];
+
+            config.forEach(item => {
+                const list = unusedData[item.key];
+                const control = document.createElement('div');
+                control.innerHTML = `<label>${item.title} (${list.length}):</label>`;
+                
+                const checkboxList = document.createElement('div');
+                checkboxList.classList.add('checkbox-list');
+                checkboxList.style.minHeight = '190px'; 
+                checkboxList.style.maxHeight = '190px'; 
+
+                if (list.length === 0) {
+                     checkboxList.innerHTML = `<p style="margin: 0; padding: 5px; font-size: 0.85em; color: green; font-weight: bold;">All entities are in use.</p>`;
+                } else {
+                    list.forEach(value => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.style.fontSize = '0.85em';
+                        itemDiv.style.padding = '2px 0';
+                        itemDiv.textContent = value;
+                        checkboxList.appendChild(itemDiv);
+                    });
+                }
+
+                control.appendChild(checkboxList);
+                unusedEntitiesContentDiv.appendChild(control);
+            });
+
+            // Ensure the container for these lists has the correct layout
+            unusedEntitiesContentDiv.style.display = 'flex'; 
+            unusedEntitiesContentDiv.style.flexWrap = 'wrap'; 
+            unusedEntitiesContentDiv.style.gap = '10px';
+            unusedEntitiesContentDiv.style.paddingTop = '5px';
+        }
+        // --- END NEW ---
+
+        // --- Helper: Extract unique values for filtering ---
+        function extractUniqueValues(data, key) {
+            const values = new Set();
+            data.forEach(item => {
+                let val = item[key];
+                
+                if (key === "Target/Resource") {
+                    val = val === "" ? "No Target in Group" : val;
+                } else if (key === "Username") {
+                    val = val === "" ? "No User in Group" : val;
+                } else if (key === "Host IP") {
+                    val = val === "" ? "No Host IP" : val;
+                }
+                
+                if (val !== undefined && val !== null) { 
+                    values.add(val);
+                }
+            });
+            return Array.from(values).sort( (a, b) => {
+                const specialValues = ["No Target in Group", "No User in Group", "No Host IP"];
+                const isSpecialA = specialValues.includes(a);
+                if (isSpecialA) return -1;
+                return a.localeCompare(b);
+            });
+        }
+
+        // --- Apply Filters ---
+        function applyFilters(data) {
+            
+            function getSelectedValues(key) {
+                const listDiv = document.getElementById(`${key.toLowerCase().replace(/ /g, '-')}-filter-list`);
+                if (!listDiv) return [];
+                
+                const checkedBoxes = listDiv.querySelectorAll(`input[type="checkbox"][data-filter-key="${key}"]:checked`);
+                
+                if (checkedBoxes.length === 0) return [];
+
+                return Array.from(checkedBoxes).map(cb => cb.dataset.filterValue);
+            }
+
+            const selectedTargets = getSelectedValues("Target/Resource");
+            const selectedAuths = getSelectedValues("Authorization Name");
+            const selectedIPs = getSelectedValues("Host IP");
+            const selectedUsers = getSelectedValues("Username");
+            const selectedTargetgroups = getSelectedValues("Targetgroup");
+            const selectedUsergroups = getSelectedValues("Usergroup");
+            
+            const filteredData = data.filter(item => {
+                
+                const targetMatches = selectedTargets.length === 0 || selectedTargets.includes(item["Target/Resource"]);
+                const authMatches = selectedAuths.length === 0 || selectedAuths.includes(item["Authorization Name"]);
+                const ipMatches = selectedIPs.length === 0 || selectedIPs.includes(item["Host IP"]);
+                const userMatches = selectedUsers.length === 0 || selectedUsers.includes(item["Username"]);
+                const targetgroupMatches = selectedTargetgroups.length === 0 || selectedTargetgroups.includes(item["Targetgroup"]);
+                const usergroupMatches = selectedUsergroups.length === 0 || selectedUsergroups.includes(item["Usergroup"]);
+                
+                return targetMatches && authMatches && ipMatches && userMatches && targetgroupMatches && usergroupMatches; 
+            });
+            console.log(`Filtered data results: ${filteredData.length} rows.`);
+            return filteredData;
+        }
+
+        // --- View Mode Change Handler ---
+        function handleViewModeChange() {
+            console.log('View mode changed. Re-rendering table.');
+            reRenderTableWithFilters();
+        }
+
+        // --- Rerender Table after Filters/Sorts ---
+        function reRenderTableWithFilters() {
+            let dataToSort = [...rawAccessList];
+            
+            if (sortCriteria.length > 0) {
+                 dataToSort.sort((a, b) => {
+                    for (let i = 0; i < sortCriteria.length; i++) {
+                        const criteria = sortCriteria[i];
+                        const comparisonResult = customSortLogic(a, b, criteria.header, criteria.direction);
+                        
+                        if (comparisonResult !== 0) {
+                            return comparisonResult;
+                        }
+                    }
+                    // Secondary stable sort using the original index
+                    return customSortLogic(a, b, ROW_INDEX_HEADER, 1);
+                });
+            } else {
+                 // Default sort by original index if no explicit sort applied
+                 dataToSort.sort((a, b) => {
+                     return customSortLogic(a, b, ROW_INDEX_HEADER, 1);
+                 });
+            }
+
+            const filteredData = applyFilters(dataToSort);
+            
+            const groupByMode = document.querySelector('input[name="viewMode"]:checked').value;
+            renderTable(filteredData, groupByMode);
+        }
+
+        // --- Setup Checkboxes ---
+        function setupCheckboxes() {
+            checkboxOptionsDiv.innerHTML = '';
+            
+            TOGGLEABLE_AUTH_HEADERS.forEach(header => {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="checkbox" data-header="${header}" onchange="toggleAuthColumn(this)"> ${header.replace(/ /g, '&nbsp;')}`;
+                checkboxOptionsDiv.appendChild(label);
+            });
+        }
+
+        // --- Multi-level Sorting Functionality ---
+        function sortTable(header) {
+            
+            if (header === ROW_INDEX_HEADER) return; 
+            
+            const existingIndex = sortCriteria.findIndex(c => c.header === header);
+
+            if (existingIndex !== -1) {
+                const currentDirection = sortCriteria[existingIndex].direction;
+                if (currentDirection === 1) {
+                    sortCriteria[existingIndex].direction = -1; 
+                } else {
+                    sortCriteria.splice(existingIndex, 1);
+                }
+            } else {
+                sortCriteria.push({ header: header, direction: 1 });
+            }
+
+            console.log('Sorting criteria updated:', sortCriteria);
+            reRenderTableWithFilters();
+        }
+
+
+        // --- Render Table ---
+        function renderTable(data, mode) {
+            
+            console.log(`Rendering table with ${data.length} rows. Mode: ${mode}`);
+            
+            // 1. Get base fixed columns (excluding No.)
+            const currentFixedColumns = mode === 'user' ? FIXED_COLUMNS_BY_USER : FIXED_COLUMNS_BY_TARGET;
+            
+            const sourceMode = document.querySelector('input[name="targetSourceMode"]:checked').value; 
+
+            // 2. Start with fixed columns
+            let allHeaders = [...currentFixedColumns];
+            
+            // 3. Insert Access Type at index 3 (which will be the 5th column after No. is added)
+            if (sourceMode === 'separate') { 
+                 // MODIFIED: Insert ACCESS_TYPE_HEADER at index 3 to make it the 5th overall column.
+                 if (allHeaders.length >= 3) {
+                     allHeaders.splice(3, 0, ACCESS_TYPE_HEADER); 
+                 } else {
+                     allHeaders.push(ACCESS_TYPE_HEADER);
+                 }
+            }
+            
+            // 4. Prepend the Row Index Header
+            allHeaders.unshift(ROW_INDEX_HEADER); 
+            
+            // 5. Append toggleable columns
+            allHeaders = [...allHeaders, ...TOGGLEABLE_AUTH_HEADERS];
+
+            let tableHTML = '<table>';
+            tableHTML += '<thead><tr>';
+            
+            allHeaders.forEach(header => {
+                const classKey = sanitizeHeaderForCSS(header); 
+                const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER; 
+                
+                let className = isFixed ? '' : `auth-col auth-col-${classKey}`;
+                
+                const isRowIndex = (header === ROW_INDEX_HEADER); 
+
+                if (isRowIndex) {
+                    className += ' row-index-col';
+                }
+                
+                let sortClass = '';
+                let sortIconHTML = '';
+                let sortIndexHTML = '';
+                
+                const criteriaIndex = sortCriteria.findIndex(c => c.header === header);
+
+                const onClickAttribute = isRowIndex ? '' : `onclick="sortTable('${header}')"`;
+
+                if (criteriaIndex !== -1) {
+                    const direction = sortCriteria[criteriaIndex].direction;
+                    sortClass = direction === 1 ? 'asc' : 'desc';
+                    sortIndexHTML = `<span class="sort-index">${criteriaIndex + 1}</span>`;
+                    sortIconHTML = '<span class="sort-icon"></span>';
+                } 
+
+                tableHTML += `<th class="${className} ${sortClass}" ${onClickAttribute}>
+                                ${header} 
+                                ${!isRowIndex ? 
+                                `<span class="sort-indicator">
+                                    ${sortIndexHTML}
+                                    ${sortIconHTML}
+                                </span>
+                                <span class="sortable-icon"></span>` : ''}
+                              </th>`;
+            });
+            tableHTML += '</tr></thead>';
+            
+            tableHTML += '<tbody>';
+            data.forEach((item, index) => { 
+                tableHTML += '<tr>';
+                allHeaders.forEach(header => {
+                    
+                    let rawValue;
+                    
+                    if (header === ROW_INDEX_HEADER) {
+                        rawValue = index + 1; 
+                    } else if (header === ACCESS_TYPE_HEADER) {
+                        rawValue = item["TargetSource"];
+                    } else {
+                        rawValue = item[header];
+                    }
+                    
+                    const classKey = sanitizeHeaderForCSS(header);
+                    const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER; 
+                    
+                    let className = isFixed ? '' : `auth-col auth-col-${classKey}`;
+                    
+                    if (header === ROW_INDEX_HEADER) {
+                        className += ' row-index-col';
+                    }
+
+                    let { displayValue, colorClass } = formatValueAndGetClass(header, rawValue);
+
+                    if (header === "Target/Resource") {
+                        const targetName = item["Target/Resource"] || '';
+                        const source = item["TargetSource"];
+
+                        if (targetName === "") {
+                            displayValue = `<span style="color: red; font-weight: bold;">No Target in Group</span>`;
+                            colorClass = '';
+                        } else if (source && sourceMode === 'integrated') { 
+                            displayValue = `${formatValueAndGetClass(header, targetName).displayValue} <span class="target-source">(${source})</span>`;
+                            colorClass = '';
+                        } else {
+                            displayValue = formatValueAndGetClass(header, targetName).displayValue;
+                            colorClass = '';
+                        }
+                    } 
+                    
+                    else if (header === ACCESS_TYPE_HEADER) { 
+                         if (rawValue === '') {
+                             displayValue = 'N/A';
+                         } else {
+                             displayValue = rawValue;
+                         }
+                         colorClass = '';
+
+                    }
+                    
+                    else if (header === "Host IP" && rawValue === '') {
+                        displayValue = '<span style="color: red; font-weight: bold;">No Host IP</span>'; 
+                        colorClass = '';
+                    }
+
+                    else if (header === "Username") {
+                        if (rawValue === "") {
+                            displayValue = `<span style="color: red; font-weight: bold;">No User in Group</span>`; 
+                            colorClass = ''; 
+                        } else if (rawValue === '') {
+                             displayValue = '[Empty Username]';
+                        }
+                    }
+                    
+                    else if (header === "Targetgroup" && rawValue === '') {
+                        displayValue = '[Empty Targetgroup]'; 
+                        colorClass = '';
+                    }
+
+                    else if (header === "Usergroup" && rawValue === '') {
+                        displayValue = '[Empty Usergroup]'; 
+                        colorClass = '';
+                    }
+                    
+                    else if (header === "Authorization Name" && rawValue === '') {
+                        displayValue = '[Empty Auth Name]'; 
+                        colorClass = '';
+                    }
+                    
+                    else if (header === ROW_INDEX_HEADER) {
+                        colorClass = '';
+                        displayValue = rawValue; 
+                    }
+
+
+                    let finalClassName = `${className} ${colorClass}`;
+
+                    tableHTML += `<td class="${finalClassName}">${displayValue}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            
+            if (data.length === 0 && rawAccessList.length > 0) {
+                resultTableDiv.innerHTML = '<p class="info">No results found with the current filters.</p>';
+                rowCountDisplay.innerHTML = `Total rows displayed: 0 / ${rawAccessList.length}`;
+            } else {
+                resultTableDiv.innerHTML = tableHTML;
+                rowCountDisplay.innerHTML = `Total rows displayed: ${data.length} / ${rawAccessList.length}`;
+            }
+
+            
+            TOGGLEABLE_AUTH_HEADERS.forEach(header => {
+                const checkbox = document.querySelector(`#checkbox-options input[data-header="${header}"]`);
+                if (checkbox) {
+                    toggleAuthColumn(checkbox); 
+                }
+            });
+            console.log('Table rendering complete.');
+        }
+
+        // --- Toggle Authorization Columns Visibility ---
+        function toggleAuthColumn(checkbox) {
+            const header = checkbox.dataset.header;
+            const classKey = sanitizeHeaderForCSS(header);
+            const className = `auth-col-${classKey}`;
+            
+            const elements = document.querySelectorAll(`.${className}`);
+            
+            elements.forEach(el => {
+                if (checkbox.checked) {
+                    el.style.display = 'table-cell';
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+        }
+        
+        // --- Theme Change Logic ---
+        function handleThemeChange() {
+            const toggle = document.getElementById('theme-mode-toggle');
+            const mode = toggle.checked ? 'dark' : 'light';
+            const boundaryDivs = document.querySelectorAll('#view-mode-controls > div');
+            
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                boundaryDivs.forEach(div => {
+                   if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--dark-border)';
+                });
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                 boundaryDivs.forEach(div => {
+                   if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--light-border)';
+                });
+            }
+            console.log(`Theme switched to ${mode} mode.`);
+        }
+        
+        // --- Initialization on DOM Load (The Fix) ---
+        document.addEventListener('DOMContentLoaded', () => {
+             console.log('DOM Content Loaded. Initializing.');
+             
+             // 1. Assign DOM Elements
+             dropArea = document.getElementById('drop-area');
+             fileElem = document.getElementById('fileElem');
+             fileListUL = document.getElementById('uploaded-files-ul');
+             controlPanelContainerDiv = document.getElementById('control-panel-container');
+             resultTableDiv = document.getElementById('result-table');
+             checkboxOptionsDiv = document.getElementById('checkbox-options');
+             viewModeOptionsDiv = document.getElementById('view-mode-options');
+             filterControlsDiv = document.getElementById('filter-controls');
+             exportInstructionsDiv = document.getElementById('export-instructions');
+             rowCountDisplay = document.getElementById('row-count-display');
+             unusedEntitiesControlsDiv = document.getElementById('unused-entities-controls'); // NEW
+             unusedEntitiesContentDiv = document.getElementById('unused-entities-content'); // NEW
+
+
+             // Initial state setup
+             controlPanelContainerDiv.style.display = 'none';
+
+             // 2. Setup Theme
+             const savedTheme = localStorage.getItem('theme') || 'light';
+             const toggle = document.getElementById('theme-mode-toggle');
+             
+             if (savedTheme === 'dark') {
+                 toggle.checked = true;
+             }
+             handleThemeChange(); 
+
+             // 3. Setup Drag and Drop Listeners
+             function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+             function highlight() { dropArea.classList.add('highlight'); }
+             function unhighlight() { dropArea.classList.remove('highlight'); }
+             function handleDrop(e) { 
+                 let dt = e.dataTransfer; 
+                 let files = dt.files; 
+                 handleFiles(files); 
+             }
+
+             dropArea.addEventListener('click', () => fileElem.click());
+             fileElem.addEventListener('change', (e) => handleFiles(e.target.files));
+             
+             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                 dropArea.addEventListener(eventName, preventDefaults, false);
+             });
+             ['dragenter', 'dragover'].forEach(eventName => {
+                 dropArea.addEventListener(eventName, highlight, false);
+             });
+             ['dragleave', 'drop'].forEach(eventName => {
+                 dropArea.addEventListener(eventName, unhighlight, false);
+             });
+             dropArea.addEventListener('drop', handleDrop, false);
+             
+             console.log('Initialization complete. Awaiting file drop.');
+        });
+        
+    </script>
+</body>
+</html>
