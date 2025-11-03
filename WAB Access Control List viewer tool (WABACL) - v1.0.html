@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WAB Access Control List viewer tool (WABACL) - v1.0</title>
+    <title>WAB Access Control List viewer tool (WABACL) - v2.0.1</title>
     <style>
         /* Base Color: #f27324 */
         :root {
@@ -18,6 +18,9 @@
             --dark-table-even: #2b2b2b;
             --light-border: #ddd;
             --dark-border: #444;
+            /* Tooltip Colors */
+            --tooltip-light-bg: #444;    
+            --tooltip-dark-bg: #555;    
         }
 
         body {
@@ -52,7 +55,7 @@
         body.dark-mode #checkbox-controls,
         body.dark-mode #view-mode-controls,
         body.dark-mode #filter-controls-container,
-        body.dark-mode #unused-entities-controls /* NEW: Added Dark Mode Style */
+        body.dark-mode #unused-entities-controls 
         {
             background-color: var(--dark-panel-bg); 
             color: var(--dark-text);
@@ -71,7 +74,7 @@
         }
         body.dark-mode th {
             background-color: var(--primary-color); 
-            color: white; /* Header text is always white */
+            color: white; 
             border-color: var(--dark-border);
         }
         body.dark-mode td {
@@ -81,7 +84,7 @@
             background-color: var(--dark-table-even);
         }
         body.dark-mode #filter-controls div.checkbox-list,
-        body.dark-mode #unused-entities-content div.checkbox-list /* NEW: Dark mode for Unused box lists */
+        body.dark-mode #unused-entities-content div.checkbox-list 
         {
             background-color: var(--dark-bg);
             border-color: var(--dark-border);
@@ -100,6 +103,14 @@
             border-bottom-color: #444;
         }
         /* End Dark Mode Styles */
+
+        /* --- Sub-protocol Colors --- */
+        .sub-proto-green { color: #228B22; } /* Forest Green for light mode */
+        .sub-proto-red { color: #D22B2B; } /* Firebrick Red for light mode */
+        
+        body.dark-mode .sub-proto-green { color: #90EE90; } /* Light Green for dark mode */
+        body.dark-mode .sub-proto-red { color: #FF4136; } /* Bright Red for dark mode */
+        /* --- End Sub-protocol Colors --- */
 
         /* Theme Toggle Button Styling */
         #theme-toggle-container {
@@ -278,7 +289,7 @@
         #checkbox-controls, 
         #view-mode-controls, 
         #filter-controls-container,
-        #unused-entities-controls /* NEW: Added Unused Entities Container */
+        #unused-entities-controls 
         {
             border: 1px solid #ddd;
             border-radius: 8px;
@@ -295,14 +306,14 @@
         #view-mode-controls { min-width: 180px; }
         #checkbox-controls { min-width: 230px; }
         #filter-controls-container { flex-grow: 1; }
-        #unused-entities-controls { min-width: 250px; } /* NEW: Styled unused panel */
+        #unused-entities-controls { min-width: 250px; } 
         
-        #view-mode-options, #target-source-options {
+        #view-mode-options, #target-source-options, #protocol-options, #user-detail-options {
             display: flex;
             flex-wrap: wrap;
             gap: 8px 12px;
         }
-        /* NEW: Vertical layout for optional columns */
+        /* Vertical layout for optional columns */
         #checkbox-options {
             display: flex;
             flex-direction: column; 
@@ -310,7 +321,7 @@
         }
         /* END NEW */
 
-        #view-mode-options label, #checkbox-options label, #target-source-options label {
+        #view-mode-options label, #checkbox-options label, #target-source-options label, #protocol-options label, #user-detail-options label {
             display: flex;
             align-items: center;
             font-size: 0.85em;
@@ -318,7 +329,7 @@
         }
 
         #filter-controls, 
-        #unused-entities-content /* NEW: Apply flex layout to unused content */
+        #unused-entities-content 
         {
             display: flex;
             flex-wrap: wrap;
@@ -326,7 +337,7 @@
         }
         
         #filter-controls > div,
-        #unused-entities-content > div /* NEW: Apply column style to inner divs */
+        #unused-entities-content > div 
         {
             display: flex;
             flex-direction: column;
@@ -334,7 +345,7 @@
         }
         
         #filter-controls div.checkbox-list,
-        #unused-entities-content div.checkbox-list /* NEW: Apply list style to unused content */
+        #unused-entities-content div.checkbox-list 
         {
             max-height: 190px;
             min-height: 190px;
@@ -358,11 +369,11 @@
             cursor: pointer;
         }
         
+        /* Removed bold font weight to control bolding via JS */
         #unused-entities-content > div > label {
-            font-size: 0.85em;
-            font-weight: bold;
-        }
-        /* NEW: Style for items inside the unused list - no checkboxes needed */
+             font-size: 0.85em;
+        } 
+        /* Style for items inside the unused list - no checkboxes needed */
         #unused-entities-content div.checkbox-list div {
              font-size: 0.85em;
              padding: 2px 0;
@@ -375,7 +386,7 @@
         #sticky-scroll-wrapper {
             overflow-x: auto;
             position: relative;
-            padding-bottom: 15px;
+            /* Removed padding-bottom: 15px; to remove empty space at the end of the table (Correct) */
         }
 
         table {
@@ -383,6 +394,7 @@
             min-width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            margin-bottom: 0; /* Ensure no bottom margin pushes the parent down (Correct) */
             direction: ltr;
         }
         th, td {
@@ -394,24 +406,44 @@
             transition: border-color 0.3s, background-color 0.3s, color 0.3s;
         }
         
-        /* MODIFIED: Row Index Style Adjustment */
+        /* Row Index Style Adjustment */
         th.row-index-col, td.row-index-col {
             text-align: center;
             width: 1%;
             font-weight: bold;
             position: sticky;
             left: 0;
-            z-index: 10;
+            z-index: 1010; 
         }
         th.row-index-col { 
+            z-index: 1011; 
+            background-color: var(--primary-color);
+            color: white;
         }
         td.row-index-col { 
             color: #555; 
         }
-        body.dark-mode th.row-index-col, body.dark-mode td.row-index-col {
+        /* Ensure row-index cells match row colors */
+        tr:not(:nth-child(even)) td.row-index-col {
+             background-color: white; /* odd rows */
+        }
+        tr:nth-child(even) td.row-index-col {
+            background-color: #f2f2f2; /* even rows */
+        }
+        
+        body.dark-mode th.row-index-col {
+            color: white;
+            background-color: var(--primary-color);
+        }
+        body.dark-mode td.row-index-col {
             color: #eee;
         }
-        /* END MODIFIED */
+        body.dark-mode tr:not(:nth-child(even)) td.row-index-col {
+             background-color: var(--dark-panel-bg); /* odd rows */
+        }
+        body.dark-mode tr:nth-child(even)) td.row-index-col {
+            background-color: var(--dark-table-even); /* even rows */
+        }
         
         th {
             background-color: var(--primary-color);
@@ -428,9 +460,11 @@
             transition: background-color 0.3s;
         }
         
-        /* MODIFIED: Ensure text color is always #333 (dark) on light backgrounds */
-        .color-negative { background-color: #F08080; color: #333 !important; } 
-        .color-positive { background-color: #90EE90; color: #333 !important; } 
+        /* Ensure text color is always #333 (dark) on light backgrounds */
+        /* ADDED !important to background-color to override sticky column default */
+        .color-negative { background-color: #F08080 !important; color: #333 !important; } 
+        .color-positive { background-color: #90EE90 !important; color: #333 !important; } 
+        .color-mixed { background-color: #FFFFE0 !important; color: #333 !important; } /* Light Yellow */
         
         .error { color: red; font-weight: bold; margin-bottom: 15px; }
         .info { color: green; font-weight: bold; margin-bottom: 15px; }
@@ -450,13 +484,6 @@
         body.dark-mode .footer-link-container {
             border-top-color: var(--dark-border);
         }
-        .footer-link-container a {
-            color: var(--primary-color);
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 1em;
-        }
-        
         #row-count-display {
              text-align: right;
              font-weight: bold;
@@ -468,8 +495,14 @@
         body.dark-mode #row-count-display {
             border-top-color: var(--dark-border);
         }
-
-        /* Sorting Icons (Modified for No. column) */
+        .footer-link-container a {
+            color: var(--primary-color);
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        
+        /* Sorting Icons */
         th .sort-indicator {
             display: inline-flex;
             align-items: center;
@@ -513,6 +546,112 @@
         th.desc .sortable-icon {
             display: none;
         }
+
+        /* --- Tooltip Styles (MODIFIED to default to position: ABOVE) --- */
+        td.user-cell {
+            position: relative; 
+            cursor: default; 
+        }
+
+        td.user-cell .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: var(--tooltip-light-bg); 
+            color: #fff; 
+            text-align: left;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 2000;
+            
+            /* NEW DEFAULT: Position ABOVE the cell */
+            left: 0; 
+            transform: none; 
+            top: auto; 
+            bottom: 100%; 
+            margin-top: 0;
+            margin-bottom: 5px; 
+            
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: normal;
+            font-size: 0.85em;
+            line-height: 1.4;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            direction: ltr; 
+        }
+
+        td.user-cell:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Arrow for NEW default (top) position: Points DOWN (Light Mode) */
+        td.user-cell .tooltiptext::after {
+            content: "";
+            position: absolute;
+            bottom: auto; 
+            top: 100%; 
+            left: 5px; 
+            margin-left: 0; 
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--tooltip-light-bg) transparent transparent transparent; 
+        }
+
+        /* NEW Class for Tooltip BELOW positioning (toggled by JS) */
+        td.user-cell.bottom-position .tooltiptext {
+            /* Position BELOW the cell */
+            top: 100%;
+            bottom: auto;
+            margin-top: 5px; 
+            margin-bottom: 0; 
+        }
+
+        /* Arrow for bottom position: Points UP (Light Mode) */
+        td.user-cell.bottom-position .tooltiptext::after {
+            bottom: 100%; 
+            top: auto; 
+            left: 5px; 
+            margin-left: 0;
+            border-color: transparent transparent var(--tooltip-light-bg) transparent; 
+        }
+        
+        /* Tooltip Field Name Color */
+        .tooltip-field-name {
+            font-weight: bold; 
+            margin-right: 10px;
+            color: #ffcc99; 
+        }
+
+        /* Dark Mode Tooltip Overrides */
+        body.dark-mode td.user-cell .tooltiptext {
+            background-color: var(--tooltip-dark-bg); 
+            color: #333; 
+            border: 1px solid var(--tooltip-dark-bg);
+        }
+
+        /* Dark mode NEW default (top) arrow: Points DOWN */
+        body.dark-mode td.user-cell .tooltiptext::after {
+            left: 5px; 
+            margin-left: 0;
+            border-color: var(--tooltip-dark-bg) transparent transparent transparent; 
+        }
+
+        /* Dark mode bottom position arrow: Points UP */
+        body.dark-mode td.user-cell.bottom-position .tooltiptext::after {
+            left: 5px; 
+            margin-left: 0;
+            border-color: transparent transparent var(--tooltip-dark-bg) transparent; 
+        }
+        
+        /* Dark Mode Tooltip Field Name Color Override */
+        body.dark-mode .tooltip-field-name {
+            color: var(--primary-color); 
+        }
+        
+        /* --- END Tooltip Styles --- */
     </style>
 </head>
 <body>
@@ -525,7 +664,7 @@
         </label>
     </div>
 
-    <h1>WAB Access Control List viewer tool (WABACL) - v1.0</h1>
+    <h1>WAB Access Control List viewer tool (WABACL) - v2.0.1</h1>
     
     <div id="export-instructions">
         <h3>Required Export Instructions</h3>
@@ -554,23 +693,39 @@
                      <h2>View Settings</h2>
                      
                      <div style="border-bottom: 1px dashed var(--light-border); padding-bottom: 8px;">
-                        <label style="font-weight: bold; font-size: 0.95em;">Data Grouping:</label>
+                        <label style="font-weight: bold; font-size: 0.95em;">First Column:</label>
                          <div id="view-mode-options">
-                             <label><input type="radio" name="viewMode" value="user" checked onchange="handleViewModeChange()"> Group by User</label>
-                             <label><input type="radio" name="viewMode" value="target" onchange="handleViewModeChange()"> Group by Target/Resource</label>
+                             <label><input type="radio" name="viewMode" value="user" checked onchange="handleViewModeChange()"> User</label>
+                             <label><input type="radio" name="viewMode" value="target" onchange="handleViewModeChange()"> Target</label>
                          </div>
                      </div>
                      
                      <div style="padding-top: 8px; border-bottom: 1px dashed var(--light-border); padding-bottom: 8px;">
-                        <label style="font-weight: bold; font-size: 0.95em;">Target Source Display:</label>
+                        <label style="font-weight: bold; font-size: 0.95em;">Show Access Type:</label>
                         <div id="target-source-options">
                             <label><input type="radio" name="targetSourceMode" value="integrated" checked onchange="handleViewModeChange()"> Integrated</label>
-                            <label><input type="radio" name="targetSourceMode" value="separate" onchange="handleViewModeChange()"> Access Type Column</label>
+                            <label><input type="radio" name="targetSourceMode" value="separate" onchange="handleViewModeChange()"> Separate</label>
                             <label><input type="radio" name="targetSourceMode" value="hide" onchange="handleViewModeChange()"> Hide</label>
                         </div>
                      </div>
                      
-                </div>
+                     <div style="padding-top: 8px; padding-bottom: 0px;">
+                        <label style="font-weight: bold; font-size: 0.95em;">Show Service Name:</label>
+                        <div id="protocol-options">
+                            <label><input type="radio" name="protocolMode" value="integrated" checked onchange="handleViewModeChange()"> Integrated</label>
+                            <label><input type="radio" name="protocolMode" value="separate" onchange="handleViewModeChange()"> Separate</label>
+                            <label><input type="radio" name="protocolMode" value="hide" onchange="handleViewModeChange()"> Hide</label>
+                        </div>
+                     </div>
+                     
+                     <div style="padding-top: 8px; border-top: 1px dashed var(--light-border);">
+                        <label style="font-weight: bold; font-size: 0.95em;">User Detail:</label>
+                        <div id="user-detail-options">
+                            <label><input type="radio" name="userDetailMode" value="show" checked onchange="reRenderTableWithFilters()"> Show</label>
+                            <label><input type="radio" name="userDetailMode" value="hide" onchange="reRenderTableWithFilters()"> Hide</label>
+                        </div>
+                     </div>
+                     </div>
                 
                 <div id="filter-controls-container">
                     <h2>Data Filters</h2>
@@ -579,8 +734,7 @@
                 </div>
 
                 <div id="unused-entities-controls">
-                    <h2>Orphaned Entities</h2>
-                    <div id="unused-entities-content">
+                    <h2>Ungrouped Entities</h2> <div id="unused-entities-content">
                         </div>
                 </div>
                 <div id="checkbox-controls">
@@ -614,11 +768,14 @@
             usersgroup: [],
             user: [],
             errors: [],
-            unused: { users: [], hosts: [], targets: [] } // NEW: Store unused entities
+            unused: { users: [], hosts: [], targets: [] } 
         };
         
+        let userProfileMap = new Map(); 
+
         // --- Column definitions and ordering ---
         const ACCESS_TYPE_HEADER = "Access Type"; 
+        const PROTOCOL_HEADER = "Service Name"; 
         const ROW_INDEX_HEADER = "No"; 
         const _ORIGINAL_INDEX_KEY = "_ORIGINAL_INDEX_"; 
         
@@ -660,6 +817,7 @@
             auth: "Authorization",
             resource: "Resource",
             targetsgroup: "Targets Group",
+            usersgroup: "User Group", // Changed from usersgroup to User Group for clarity
             user: "User"
         };
 
@@ -672,7 +830,7 @@
             user: ["Full name"]
         };
         
-        // --- Filter Keys in Desired Order (User Request) ---
+        // --- Filter Keys in Desired Order ---
         const FILTER_KEYS_ORDER = [
              "Username",
              "Target/Resource",
@@ -693,8 +851,8 @@
         let filterControlsDiv;
         let exportInstructionsDiv;
         let rowCountDisplay;
-        let unusedEntitiesControlsDiv; // NEW: Unused Entities DOM element
-        let unusedEntitiesContentDiv;  // NEW: Unused Entities Content DOM element
+        let unusedEntitiesControlsDiv; 
+        let unusedEntitiesContentDiv;  
 
         // --- Helper: Clean header name for use in CSS ---
         function sanitizeHeaderForCSS(header) {
@@ -770,6 +928,7 @@
 
             if (totalFiles !== 5) {
                 const message = `Error: Exactly 5 files (Auth, Resource, TargetGroup, UserGroup, User) must be uploaded. ${totalFiles} files received.`;
+                allData.errors.push(message); 
                 resultTableDiv.innerHTML = `<p class="error">${message}</p>`;
                 exportInstructionsDiv.style.display = 'block'; 
                 console.error(message);
@@ -893,25 +1052,42 @@
         // --- Helper: Extract Resource Name from a full Target string ---
         function extractResourceName(target) {
             let resourceIdentifier = target;
-            resourceIdentifier = resourceIdentifier.includes(':') ? resourceIdentifier.split(':')[0] : resourceIdentifier;
+            
+            // Per user request: Target/Resource is LEFT of the colon.
+            if (resourceIdentifier.includes(':')) {
+                 resourceIdentifier = resourceIdentifier.substring(0, resourceIdentifier.indexOf(':'));
+            }
+
+            // Keep the existing logic for stripping account (e.g., 'user@resource')
             resourceIdentifier = resourceIdentifier.includes('@') ? resourceIdentifier.split('@').pop() : resourceIdentifier;
             
             return resourceIdentifier;
         }
+        
+        // --- Helper: Extract Protocol from a full Target string ---
+        function extractProtocol(target) {
+             // Per user request: Protocol is RIGHT of the colon.
+             if (target.includes(':')) {
+                 // Find the last colon, and take everything after it.
+                 const lastColonIndex = target.lastIndexOf(':');
+                 return target.substring(lastColonIndex + 1);
+             }
+             return '';
+        }
 
-        // --- Check file completeness and start analysis ---
+        // --- Central check and initiation function ---
         function checkAndAnalyze() {
             console.log('--- Check and Analyze Started ---');
+            
             const fileTypes = Object.keys(REQUIRED_HEADERS);
             const allFilesRead = fileTypes.every(type => allData[type].length > 0);
-            
             console.log(`All files successfully read (data presence): ${allFilesRead}`);
             console.log(`Errors found during parse: ${allData.errors.length}`);
-            
+
             if (allData.errors.length > 0) {
                 resultTableDiv.innerHTML = `<p class="error">The following errors occurred while reading files:</p><ul>${allData.errors.map(err => `<li>${err}</li>`).join('')}</ul>`;
                 controlPanelContainerDiv.style.display = 'none';
-                exportInstructionsDiv.style.display = 'block';
+                exportInstructionsDiv.style.display = 'block'; 
                 rowCountDisplay.innerHTML = '';
                 console.error('CheckAndAnalyze FAILED due to parsing errors.');
             } else if (allFilesRead) {
@@ -919,241 +1095,353 @@
                 console.log('CheckAndAnalyze SUCCESS. Starting analyzeAccess.');
                 analyzeAccess();
                 setupFilters();
-                setupUnusedFilters(); // NEW: Call setup for unused entities
+                setupUnusedFilters();
                 controlPanelContainerDiv.style.display = 'block';
+                
+                // --- SCROLL IMPLEMENTATION (CHANGE 3) ---
+                document.getElementById('control-panel-container').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                // --- END SCROLL IMPLEMENTATION ---
+
             } else {
-                 const missingFiles = fileTypes.filter(type => allData[type].length === 0).map(type => FILE_TYPE_MAPPING[type]);
-                 const message = `Error: One of the mandatory files is either empty or was not correctly identified. Missing data for: ${missingFiles.join(', ')}`;
-                 resultTableDiv.innerHTML = `<p class="error">${message}</p>`;
-                 controlPanelContainerDiv.style.display = 'none';
-                 exportInstructionsDiv.style.display = 'block'; 
-                 rowCountDisplay.innerHTML = '';
-                 console.error('CheckAndAnalyze FAILED: Missing essential data.', missingFiles);
+                const missingFiles = fileTypes.filter(type => allData[type].length === 0).map(type => FILE_TYPE_MAPPING[type] || type);
+                const message = `Error: One of the mandatory files is either empty or was not correctly identified. Missing data for: ${missingFiles.join(', ')}`;
+                resultTableDiv.innerHTML = `<p class="error">${message}</p>`;
+                controlPanelContainerDiv.style.display = 'none';
+                exportInstructionsDiv.style.display = 'block'; 
+                rowCountDisplay.innerHTML = '';
+                console.error('CheckAndAnalyze FAILED: Missing essential data.', missingFiles);
             }
         }
-        
-        // Custom comparison logic for sorting 
+
+        // Custom comparison logic for sorting
         function customSortLogic(a, b, header, direction) {
-            
             // Handle original index for stable sort fallback
-            if (header === ROW_INDEX_HEADER) {
+            if (header === _ORIGINAL_INDEX_KEY) { // CHANGED
+                // NOTE: This block is used for the *fallback* stable sort using the internal key.
                 const numA = parseInt(a[_ORIGINAL_INDEX_KEY]); // Use internal key
                 const numB = parseInt(b[_ORIGINAL_INDEX_KEY]); // Use internal key
                 if (numA < numB) return -1 * direction;
-                if (numA > numB) return 1 * direction;
+                if (numB < numA) return 1 * direction;
                 return 0;
             }
-            
+
+            // --- NEW SORT LOGIC FOR 'No' COLUMN ---
+            if (header === ROW_INDEX_HEADER) {
+                const statusA = a["_subProtocolStatus"] || "none";
+                const statusB = b["_subProtocolStatus"] || "none";
+                
+                // Click 1 (direction 1) = Green, Red, Yellow
+                // Click 2 (direction -1) = Red, Green, Yellow
+                const sortOrder = (direction === 1)
+                    ? { "all_green": 1, "all_red": 2, "mixed": 3, "none": 4 }
+                    : { "all_red": 1, "all_green": 2, "mixed": 3, "none": 4 };
+
+                const valA = sortOrder[statusA];
+                const valB = sortOrder[statusB];
+
+                if (valA < valB) return -1;
+                if (valA > valB) return 1;
+                return 0; // Fallback to original index sort
+            }
+            // --- END NEW SORT LOGIC ---
+
             // Convert to string safely before calling toLowerCase()
             let valA = (String(a[header] || '')).toLowerCase();
             let valB = (String(b[header] || '')).toLowerCase();
-
+            
+            // Special handling for merged columns (Access Type)
             if (header === ACCESS_TYPE_HEADER) {
-                valA = (a.TargetSource || '').toLowerCase();
-                valB = (b.TargetSource || '').toLowerCase();
+                 valA = (a.TargetSource || '').toLowerCase();
+                 valB = (b.TargetSource || '').toLowerCase();
+            }
+             // Special handling for merged columns (Service Name)
+            if (header === PROTOCOL_HEADER) {
+                 valA = (a[PROTOCOL_HEADER] || '').toLowerCase();
+                 valB = (b[PROTOCOL_HEADER] || '').toLowerCase();
             }
             
-            const isEmptyA = valA === '';
-            const isEmptyB = valB === '';
-
-            if (isEmptyA && isEmptyB) return 0;
-            
-            if (isEmptyA) return 1 * direction; 
-            if (isEmptyB) return -1 * direction; 
+            // Numerical comparison for IPs (basic check)
+            if (header === 'Host IP' && !isNaN(parseInt(valA)) && !isNaN(parseInt(valB))) {
+                const numA = parseInt(valA.split('.').map(n => (`000` + n).slice(-3)).join(''));
+                const numB = parseInt(valB.split('.').map(n => (`000` + n).slice(-3)).join(''));
+                if (numA < numB) return -1 * direction;
+                if (numB < numA) return 1 * direction;
+                return 0;
+            }
 
             if (valA < valB) return -1 * direction;
             if (valA > valB) return 1 * direction;
-            
             return 0;
         }
 
+        // --- Helper: Format multi-value fields (Groups, Source IPs, etc.) ---
+        function formatMultiValue(value) {
+            if (value === null || value === undefined || value.trim() === '') {
+                return 'N/A';
+            }
+            // Split by comma, trim whitespace from each part, and join with ", "
+            return value.split(',').map(v => v.trim()).filter(v => v).join(', ');
+        }
 
         // --- Main analysis function ---
         function analyzeAccess() {
             console.log('--- Access Analysis Started (analyzeAccess) ---');
             const { auth, targetsgroup, user, usersgroup, resource } = allData;
-            rawAccessList = [];
+            rawAccessList = []; 
 
             // Mapping logic (omitted for brevity, assume correct)
             const resourceMap = new Map();
-            resource.forEach(r => resourceMap.set(r.Name, r.Host));
+            // resource.forEach(r => resourceMap.set(r.Name, r.Host)); // OLD
+            resource.forEach(r => resourceMap.set(r.Name, r)); // NEW: Store the entire resource object
 
+            // *** FIX FOR EMPTY USER GROUPS STARTS HERE ***
             const userGroupsMap = new Map();
             usersgroup.forEach(ug => {
-                 if (ug.Users) {
-                    userGroupsMap.set(ug.Name, ug.Users.split(',').map(u => u.trim()).filter(u => u));
-                 }
+                // Ensure the group is mapped even if the 'Users' field is empty string, to prevent 
+                // an incorrect fallback to ALL users later (as the empty string is falsy).
+                
+                // Get users list (default to empty string if null/undefined, then split, trim, filter)
+                const usersList = (ug.Users || '').split(',').map(u => u.trim()).filter(u => u);
+                
+                // Add the group name to the map, which will be [] for an empty group like 'x'.
+                userGroupsMap.set(ug.Name, usersList);
             });
+            // *** FIX FOR EMPTY USER GROUPS ENDS HERE ***
 
             const userToGroupsMap = new Map();
             user.forEach(u => {
                 const groups = u.Groups ? u.Groups.split(',').map(g => g.trim()).filter(g => g) : [];
                 userToGroupsMap.set(u.Username, groups);
             });
-            
+
             const targetGroupMap = new Map();
             const targetFields = ["Target accounts", "Account mapping", "Interactive login", "Accounts", "Scenario"];
-
             targetsgroup.forEach(tg => {
                 const sourcedTargets = [];
                 targetFields.forEach(field => {
                     if (tg[field]) {
                         const rawTargets = tg[field].split(',').map(t => t.trim()).filter(t => t);
                         rawTargets.forEach(target => {
-                            sourcedTargets.push({ 
-                                target: target, 
-                                source: field 
-                            });
+                            sourcedTargets.push({ target: target, source: field });
                         });
                     }
                 });
-                targetGroupMap.set(tg.Name, sourcedTargets); 
+                targetGroupMap.set(tg.Name, sourcedTargets);
             });
 
+            // --- Create User Profile Map for Tooltip ---
+            userProfileMap.clear();
+            const TOOLTIP_FIELDS = [
+                "Full name",
+                "Source IPs",
+                "Profile",
+                "Account expiration date",
+                "Lock counter",
+                "Last connection",
+                "Disabled" 
+            ];
+            allData.user.forEach(u => {
+                let profile = {};
 
-            auth.forEach(a => {
-                const userGroupName = a['Usergroup name'];
-                const targetGroupName = a['Targetgroup name'];
-                const approverGroupsStr = a['Approver groups'];
+                // Process the 'Disabled' field into 'Status'
+                const isDisabled = (u["Disabled"] || 'False').toUpperCase() === 'TRUE';
+                profile["Status"] = isDisabled ? 'Disabled' : 'Enabled';
 
-                let authorizedUsernames = [];
-                
-                user.forEach(u => {
-                    const groups = userToGroupsMap.get(u.Username) || [];
-                    if (groups.includes(userGroupName)) {
-                        authorizedUsernames.push(u.Username);
+                TOOLTIP_FIELDS.forEach(field => {
+                    if (field === "Disabled") return; // Skip the original field
+
+                    let value = u[field] || '';
+                    if (field === "Source IPs") { 
+                        // Apply multi-value formatting
+                        profile[field] = formatMultiValue(value);
+                    } else if (value === 'False' || value === 'True') {
+                        profile[field] = (value === 'True' || value === 'TRUE'); 
+                    } else {
+                         profile[field] = value;
                     }
                 });
-                const directUsers = userGroupsMap.get(userGroupName) || [];
-                authorizedUsernames = Array.from(new Set([...authorizedUsernames, ...directUsers]));
+                userProfileMap.set(u.Username, profile);
+            });
+            // --- END NEW ---
 
-                const finalUsernames = authorizedUsernames.length > 0 ? authorizedUsernames : [""];
-                
+            // --- Generate Access List ---
+            const accessedUsernames = new Set();
+            const accessedResources = new Set();
+            const allUsers = new Set(allData.user.map(u => u.Username));
+            const allResources = new Set(allData.resource.map(r => r.Name));
+
+            auth.forEach(a => {
+                const userGroupName = a["Usergroup name"];
+                const targetGroupName = a["Targetgroup name"];
+                const approverGroupsStr = a["Approver groups"];
+
+                // 1. Get all authorized usernames
+                // NOTE: userGroupsMap.get(userGroupName) now correctly returns [] for empty groups, 
+                // preventing the fallback to ALL users when the group is empty but defined.
+                const authorizedUsernames = userGroupsMap.get(userGroupName) || allData.user.map(u => u.Username); 
+                const finalUsernames = authorizedUsernames.filter(u => u).length > 0 ? Array.from(new Set(authorizedUsernames)) : [""];
+
+                // 2. Get all targets in the target group
                 const fullSourcedTargetsInGroup = targetGroupMap.get(targetGroupName) || [];
                 let finalSourcedTargets;
-
                 if (fullSourcedTargetsInGroup.length === 0) {
-                    finalSourcedTargets = [{ 
-                        target: "", 
-                        source: "" 
-                    }];
+                    finalSourcedTargets = [{ target: "", source: "" }];
                 } else {
                     finalSourcedTargets = fullSourcedTargetsInGroup;
                 }
 
+                // 3. Get all approver usernames
                 let approverUsernames = [];
                 if (approverGroupsStr && approverGroupsStr !== '-1' && approverGroupsStr.toLowerCase() !== 'none') {
                     const approverGroups = approverGroupsStr.split(',').map(g => g.trim()).filter(g => g);
-
                     user.forEach(u => {
                         const username = u.Username;
-                        
                         const groupsInUserFile = userToGroupsMap.get(username) || [];
                         const isMemberViaUserFile = groupsInUserFile.some(g => approverGroups.includes(g));
-
+                        
                         const isMemberViaUserGroupFile = approverGroups.some(g => {
                             const users = userGroupsMap.get(g) || [];
                             return users.includes(username);
                         });
-
+                        
                         if (isMemberViaUserFile || isMemberViaUserGroupFile) {
                             approverUsernames.push(username);
                         }
                     });
-
                     approverUsernames = Array.from(new Set(approverUsernames.filter(u => u))).sort();
                 }
-                const approversList = approverUsernames.join(', ');
+                const approversList = formatMultiValue(approverUsernames.join(','));
 
 
+                // 4. Combine users and targets to form the access list
                 finalUsernames.forEach(username => {
+                    if (username) accessedUsernames.add(username);
+
                     finalSourcedTargets.forEach(sourcedTarget => {
                         const fullTargetString = sourcedTarget.target;
-                        const targetSource = sourcedTarget.source; 
-
+                        const targetSource = sourcedTarget.source;
                         const isNoTarget = fullTargetString === "";
-                        const resourceName = isNoTarget ? '' : extractResourceName(fullTargetString);
-                        const host = resourceName ? resourceMap.get(resourceName) : '';
                         
-                        let row = {};
+                        const protocol = extractProtocol(fullTargetString); 
+                        const resourceName = isNoTarget ? '' : extractResourceName(fullTargetString);
+                        if (resourceName) accessedResources.add(resourceName);
 
+                        // --- MODIFICATION START ---
+                        const resourceObj = resourceMap.get(resourceName);
+                        const host = resourceObj ? resourceObj.Host : ''; // Get Host from object
+                        // --- MODIFICATION END ---
+
+                        let row = {};
                         row["Username"] = username;
                         row["Target/Resource"] = fullTargetString;
-                        row["TargetSource"] = targetSource; 
-                        row["Host IP"] = host || ''; 
+                        row["TargetSource"] = targetSource;
+                        row[PROTOCOL_HEADER] = protocol; // Use constant
+                        row["Host IP"] = host || ''; // Correctly uses new host variable
                         row["Authorization Name"] = a.Name;
                         row["Targetgroup"] = targetGroupName;
                         row["Usergroup"] = userGroupName;
-
+                        
+                        // --- NEW: Get services set for sub-protocol comparison ---
+                        const servicesString = (resourceObj && resourceObj.Services) ? resourceObj.Services : '';
+                        // Split by any of /, //, |, or comma. Filter out empty strings.
+                        const servicesSet = new Set(servicesString.split(/[\/,|]+/).map(s => s.trim()).filter(s => s));
+                        // --- END NEW ---
+                        
                         TOGGLEABLE_AUTH_HEADERS.forEach(h => {
                             if (h === "Approvers") {
                                 row[h] = approversList;
-                            } else {
-                                row[h] = a[h] || ''; 
+                            } 
+                            // --- NEW: Special handling for Sub-protocols ---
+                            else if (h === "Sub-protocols") {
+                                const subProtocolsString = a[h] || '';
+                                let hasGreen = false;
+                                let hasRed = false;
+                                let subProtocolsList = [];
+                                
+                                if (!subProtocolsString) {
+                                    row[h] = '';
+                                } else {
+                                    subProtocolsList = subProtocolsString.split(',').map(s => s.trim()).filter(s => s);
+                                    
+                                    const formattedHtml = subProtocolsList.map(subProto => {
+                                        if (servicesSet.has(subProto)) {
+                                            // Found it! Make it green.
+                                            hasGreen = true;
+                                            return `<span class="sub-proto-green">${subProto}</span>`;
+                                        } else {
+                                            // Not found. Make it red.
+                                            hasRed = true;
+                                            return `<span class="sub-proto-red">${subProto}</span>`;
+                                        }
+                                    }).join(', '); // Re-join with comma and space
+                                    
+                                    row[h] = formattedHtml;
+                                }
+                                
+                                // Store status for "No" column coloring
+                                if (subProtocolsList.length === 0) {
+                                    row["_subProtocolStatus"] = "none"; // No protocols
+                                } else if (hasGreen && !hasRed) {
+                                    row["_subProtocolStatus"] = "all_green";
+                                } else if (!hasGreen && hasRed) {
+                                    row["_subProtocolStatus"] = "all_red";
+                                } else if (hasGreen && hasRed) {
+                                    row["_subProtocolStatus"] = "mixed";
+                                } else {
+                                     row["_subProtocolStatus"] = "none"; // Fallback
+                                }
+                            }
+                            // --- END NEW ---
+                            else {
+                                row[h] = a[h] || '';
                             }
                         });
-                        
                         rawAccessList.push(row);
                     });
                 });
             });
-            
+
             // Assign a stable index for sorting fallback, but *not* for display
             rawAccessList.forEach((row, index) => {
-                 row[_ORIGINAL_INDEX_KEY] = index + 1; // Assign to internal key
+                row[_ORIGINAL_INDEX_KEY] = index + 1; // Assign to internal key
             });
 
-
+            // Sort by Username by default
             rawAccessList.sort((a, b) => {
                 return customSortLogic(a, b, "Username", 1);
             });
 
-
             if (rawAccessList.length === 0) {
-                resultTableDiv.innerHTML = '<p class="info">No access entries found based on input files.</p>';
+                resultTableDiv.innerHTML = '<p class="info">The uploaded data resulted in an empty access list. Check if authorizations and group memberships are properly defined.</p>';
                 controlPanelContainerDiv.style.display = 'none';
-                rowCountDisplay.innerHTML = '';
-                console.warn('analyzeAccess completed, but rawAccessList is empty.');
-                return;
             }
 
-            // --- NEW: Calculate Unused Entities ---
-            const allUsers = new Set(allData.user.map(u => u.Username).filter(u => u));
-            const accessedUsers = new Set(rawAccessList.map(r => r.Username).filter(u => u));
-            const unusedUsers = Array.from(allUsers).filter(u => !accessedUsers.has(u)).sort();
-            
-            const allResources = new Set(allData.resource.map(r => r.Name).filter(n => n));
-            const accessedResourceNames = new Set(
-                rawAccessList
-                    .map(r => extractResourceName(r["Target/Resource"]))
-                    .filter(n => n)
-            );
-            const unusedResources = Array.from(allResources).filter(n => !accessedResourceNames.has(n)).sort();
+            // --- Identify Unused Entities ---
+            const unusedUsers = Array.from(allUsers).filter(u => !accessedUsernames.has(u)).sort();
             
             const allHosts = new Set(allData.resource.map(r => r.Host).filter(h => h));
             const accessedHosts = new Set(rawAccessList.map(r => r["Host IP"]).filter(h => h));
             const unusedHosts = Array.from(allHosts).filter(h => !accessedHosts.has(h)).sort();
             
-            allData.unused = {
-                users: unusedUsers,
-                hosts: unusedHosts,
-                targets: unusedResources
-            };
-            // --- END NEW ---
+            const unusedResources = Array.from(allResources).filter(r => !accessedResources.has(r)).sort();
 
+            allData.unused = { users: unusedUsers, hosts: unusedHosts, targets: unusedResources };
+            // --- END NEW ---
 
             console.log(`Raw access list created with ${rawAccessList.length} entries.`);
             setupCheckboxes();
-            
             console.log('--- Access Analysis Finished. Calling reRenderTableWithFilters. ---');
             reRenderTableWithFilters();
         }
-        
+
         // --- Setup Filter Dropdowns (Checkboxes) ---
         function setupFilters() {
             console.log('Setting up filter controls.');
             filterControlsDiv.innerHTML = '';
-
+            
             const uniqueValuesMap = {
                 "Target/Resource": extractUniqueValues(rawAccessList, "Target/Resource"),
                 "Username": extractUniqueValues(rawAccessList, "Username"),
@@ -1162,32 +1450,32 @@
                 "Targetgroup": extractUniqueValues(rawAccessList, "Targetgroup"),
                 "Usergroup": extractUniqueValues(rawAccessList, "Usergroup")
             };
-            
+
             function createCheckboxGroup(key, uniqueValues) {
                 const control = document.createElement('div');
                 control.innerHTML = `<label>Filter by ${key}:</label>`;
+
                 const checkboxList = document.createElement('div');
-                checkboxList.classList.add('checkbox-list'); 
+                checkboxList.classList.add('checkbox-list');
                 checkboxList.id = `${key.toLowerCase().replace(/ /g, '-')}-filter-list`;
 
                 uniqueValues.forEach(value => {
                     let displayValue = value;
-                    let colorStyle = ''; 
-                    
+                    let colorStyle = '';
                     let filterValue = value;
+
                     if (value === 'No Host IP' || value === 'No User in Group' || value === 'No Target in Group') {
-                        filterValue = ''; 
+                        filterValue = '';
                         const shouldBeRed = (key === "Target/Resource" || key === "Host IP" || key === "Username");
                         if (shouldBeRed) {
-                            colorStyle = 'style="color: red; font-weight: bold;"'; 
+                            colorStyle = 'style="color: red; font-weight: bold;"';
                         }
                     }
-                    
+
                     const label = document.createElement('label');
                     label.classList.add('filter-item');
                     label.innerHTML = `
-                        <input type="checkbox" data-filter-value="${filterValue}" 
-                               data-filter-key="${key}" onchange="reRenderTableWithFilters()"> 
+                        <input type="checkbox" data-filter-value="${filterValue}" data-filter-key="${key}" onchange="reRenderTableWithFilters()">
                         <span ${colorStyle}>${displayValue}</span>
                     `;
                     checkboxList.appendChild(label);
@@ -1198,64 +1486,67 @@
             }
 
             FILTER_KEYS_ORDER.forEach(key => {
-                 const control = createCheckboxGroup(key, uniqueValuesMap[key]);
-                 filterControlsDiv.appendChild(control);
+                const control = createCheckboxGroup(key, uniqueValuesMap[key]);
+                filterControlsDiv.appendChild(control);
             });
         }
-        
-        // --- NEW: Setup Unused Entities Display Boxes - CHANGED TO ENGLISH ---
+
+        // --- Setup Unused Entities Display Boxes (CHANGE 2) ---
         function setupUnusedFilters() {
             console.log('Setting up unused entities controls.');
             unusedEntitiesContentDiv.innerHTML = '';
-            
+
             const unusedData = allData.unused;
             
             const config = [
-                 { key: 'users', title: 'Users with No Access' },
-                 { key: 'hosts', title: 'Host IPs with No Access', sourceKey: 'Host' },
-                 { key: 'targets', title: 'Targets with No Access', sourceKey: 'Alias' }
+                { key: 'users', title: 'Users without Usergroup' },
+                { key: 'targets', title: 'Targets without Targetgroup' },
+                { key: 'hosts', title: 'Host IPs without Targetgroup' }
             ];
 
             config.forEach(item => {
-                const list = unusedData[item.key];
-                const control = document.createElement('div');
-                control.innerHTML = `<label>${item.title} (${list.length}):</label>`;
+                const dataList = unusedData[item.key] || [];
+                const count = dataList.length;
                 
-                const checkboxList = document.createElement('div');
-                checkboxList.classList.add('checkbox-list');
-                checkboxList.style.minHeight = '190px'; 
-                checkboxList.style.maxHeight = '190px'; 
+                // Bold the count if > 0
+                const countHtml = count > 0 
+                                  ? `<span style="font-weight: bold;">(${count})</span>` 
+                                  : `(${count})`;
 
-                if (list.length === 0) {
-                     checkboxList.innerHTML = `<p style="margin: 0; padding: 5px; font-size: 0.85em; color: green; font-weight: bold;">All entities are in use.</p>`;
+                const control = document.createElement('div');
+                // The label is not bolded by default CSS anymore.
+                control.innerHTML = `<label>${item.title} ${countHtml}:</label>`; 
+                
+                const dataListDiv = document.createElement('div');
+                dataListDiv.classList.add('checkbox-list'); 
+                
+                if (dataList.length === 0) {
+                     dataListDiv.innerHTML = '<div>(None Found)</div>';
                 } else {
-                    list.forEach(value => {
+                    dataList.forEach(value => {
                         const itemDiv = document.createElement('div');
-                        itemDiv.style.fontSize = '0.85em';
-                        itemDiv.style.padding = '2px 0';
                         itemDiv.textContent = value;
-                        checkboxList.appendChild(itemDiv);
+                        dataListDiv.appendChild(itemDiv);
                     });
                 }
 
-                control.appendChild(checkboxList);
+                control.appendChild(dataListDiv);
                 unusedEntitiesContentDiv.appendChild(control);
             });
-
-            // Ensure the container for these lists has the correct layout
-            unusedEntitiesContentDiv.style.display = 'flex'; 
-            unusedEntitiesContentDiv.style.flexWrap = 'wrap'; 
+            
+            // Adjust parent container layout
+            unusedEntitiesContentDiv.style.display = 'flex';
+            unusedEntitiesContentDiv.style.flexWrap = 'wrap';
             unusedEntitiesContentDiv.style.gap = '10px';
             unusedEntitiesContentDiv.style.paddingTop = '5px';
         }
-        // --- END NEW ---
 
         // --- Helper: Extract unique values for filtering ---
         function extractUniqueValues(data, key) {
             const values = new Set();
             data.forEach(item => {
                 let val = item[key];
-                
+
                 if (key === "Target/Resource") {
                     val = val === "" ? "No Target in Group" : val;
                 } else if (key === "Username") {
@@ -1264,29 +1555,32 @@
                     val = val === "" ? "No Host IP" : val;
                 }
                 
-                if (val !== undefined && val !== null) { 
+                if (val !== undefined && val !== null) {
                     values.add(val);
                 }
             });
+            
             return Array.from(values).sort( (a, b) => {
                 const specialValues = ["No Target in Group", "No User in Group", "No Host IP"];
                 const isSpecialA = specialValues.includes(a);
                 if (isSpecialA) return -1;
+                const isSpecialB = specialValues.includes(b);
+                if (isSpecialB) return 1;
+
                 return a.localeCompare(b);
             });
         }
 
         // --- Apply Filters ---
         function applyFilters(data) {
-            
             function getSelectedValues(key) {
                 const listDiv = document.getElementById(`${key.toLowerCase().replace(/ /g, '-')}-filter-list`);
                 if (!listDiv) return [];
-                
                 const checkedBoxes = listDiv.querySelectorAll(`input[type="checkbox"][data-filter-key="${key}"]:checked`);
                 
-                if (checkedBoxes.length === 0) return [];
-
+                // If no boxes checked, the filter is off (returns empty array).
+                if (checkedBoxes.length === 0) return []; 
+                
                 return Array.from(checkedBoxes).map(cb => cb.dataset.filterValue);
             }
 
@@ -1298,60 +1592,64 @@
             const selectedUsergroups = getSelectedValues("Usergroup");
             
             const filteredData = data.filter(item => {
-                
                 const targetMatches = selectedTargets.length === 0 || selectedTargets.includes(item["Target/Resource"]);
                 const authMatches = selectedAuths.length === 0 || selectedAuths.includes(item["Authorization Name"]);
                 const ipMatches = selectedIPs.length === 0 || selectedIPs.includes(item["Host IP"]);
                 const userMatches = selectedUsers.length === 0 || selectedUsers.includes(item["Username"]);
                 const targetgroupMatches = selectedTargetgroups.length === 0 || selectedTargetgroups.includes(item["Targetgroup"]);
                 const usergroupMatches = selectedUsergroups.length === 0 || selectedUsergroups.includes(item["Usergroup"]);
-                
-                return targetMatches && authMatches && ipMatches && userMatches && targetgroupMatches && usergroupMatches; 
+
+                return targetMatches && authMatches && ipMatches && userMatches && targetgroupMatches && usergroupMatches;
             });
-            console.log(`Filtered data results: ${filteredData.length} rows.`);
+            
             return filteredData;
         }
 
-        // --- View Mode Change Handler ---
-        function handleViewModeChange() {
-            console.log('View mode changed. Re-rendering table.');
-            reRenderTableWithFilters();
-        }
-
-        // --- Rerender Table after Filters/Sorts ---
+        // --- Main re-render function called after filtering/sorting/view change ---
         function reRenderTableWithFilters() {
             let dataToSort = [...rawAccessList];
             
             if (sortCriteria.length > 0) {
-                 dataToSort.sort((a, b) => {
-                    for (let i = 0; i < sortCriteria.length; i++) {
-                        const criteria = sortCriteria[i];
-                        const comparisonResult = customSortLogic(a, b, criteria.header, criteria.direction);
-                        
-                        if (comparisonResult !== 0) {
-                            return comparisonResult;
+                dataToSort.sort((a, b) => {
+                    for (const criteria of sortCriteria) {
+                        const result = customSortLogic(a, b, criteria.header, criteria.direction);
+                        if (result !== 0) {
+                            return result;
                         }
                     }
-                    // Secondary stable sort using the original index
-                    return customSortLogic(a, b, ROW_INDEX_HEADER, 1);
+                    // Fallback to original index for stability
+                    return customSortLogic(a, b, _ORIGINAL_INDEX_KEY, 1); // CHANGED
                 });
             } else {
-                 // Default sort by original index if no explicit sort applied
-                 dataToSort.sort((a, b) => {
-                     return customSortLogic(a, b, ROW_INDEX_HEADER, 1);
-                 });
+                // Default sort by original index if no explicit sort applied
+                dataToSort.sort((a, b) => {
+                    return customSortLogic(a, b, _ORIGINAL_INDEX_KEY, 1); // CHANGED
+                });
             }
 
             const filteredData = applyFilters(dataToSort);
-            
             const groupByMode = document.querySelector('input[name="viewMode"]:checked').value;
+
             renderTable(filteredData, groupByMode);
+        }
+
+        // --- Toggle Optional Column Visibility ---
+        function toggleAuthColumn(checkbox) {
+            const header = checkbox.dataset.header;
+            const isChecked = checkbox.checked;
+            const classKey = sanitizeHeaderForCSS(header);
+            
+            // Toggle all cells in that column
+            document.querySelectorAll(`.auth-col-${classKey}`).forEach(cell => {
+                cell.style.display = isChecked ? 'table-cell' : 'none';
+            });
+            // Toggle the header
+            document.querySelector(`.auth-col-${classKey}.header-cell`).style.display = isChecked ? 'table-cell' : 'none';
         }
 
         // --- Setup Checkboxes ---
         function setupCheckboxes() {
             checkboxOptionsDiv.innerHTML = '';
-            
             TOGGLEABLE_AUTH_HEADERS.forEach(header => {
                 const label = document.createElement('label');
                 label.innerHTML = `<input type="checkbox" data-header="${header}" onchange="toggleAuthColumn(this)"> ${header.replace(/ /g, '&nbsp;')}`;
@@ -1361,67 +1659,174 @@
 
         // --- Multi-level Sorting Functionality ---
         function sortTable(header) {
-            
-            if (header === ROW_INDEX_HEADER) return; 
-            
+            // if (header === ROW_INDEX_HEADER) return; // REMOVED
+
             const existingIndex = sortCriteria.findIndex(c => c.header === header);
 
             if (existingIndex !== -1) {
                 const currentDirection = sortCriteria[existingIndex].direction;
-                if (currentDirection === 1) {
-                    sortCriteria[existingIndex].direction = -1; 
+                if (header === ROW_INDEX_HEADER) {
+                    // For 'No' column, cycling is: Asc (Green, Red, Yellow), Desc (Red, Green, Yellow), Off
+                    if (currentDirection === 1) {
+                        sortCriteria[existingIndex].direction = -1;
+                    } else {
+                        sortCriteria.splice(existingIndex, 1);
+                    }
+                } else if (currentDirection === 1) {
+                    sortCriteria[existingIndex].direction = -1;
                 } else {
                     sortCriteria.splice(existingIndex, 1);
                 }
             } else {
                 sortCriteria.push({ header: header, direction: 1 });
             }
-
             console.log('Sorting criteria updated:', sortCriteria);
             reRenderTableWithFilters();
         }
+        
+        // --- Handle View Mode Change (re-render entire table for column restructuring) ---
+        function handleViewModeChange() {
+            sortCriteria = []; // Clear sort criteria when major view change occurs
+            reRenderTableWithFilters();
+        }
 
+        // --- Tooltip Positioning Logic ---
+        function positionTooltip(cellElement) {
+            const tooltip = cellElement.querySelector('.tooltiptext');
+            if (!tooltip) return;
 
-        // --- Render Table ---
-        function renderTable(data, mode) {
-            
-            console.log(`Rendering table with ${data.length} rows. Mode: ${mode}`);
-            
-            // 1. Get base fixed columns (excluding No.)
-            const currentFixedColumns = mode === 'user' ? FIXED_COLUMNS_BY_USER : FIXED_COLUMNS_BY_TARGET;
-            
-            const sourceMode = document.querySelector('input[name="targetSourceMode"]:checked').value; 
+            // 1. Temporarily show, measure, and calculate
+            const originalVisibility = tooltip.style.visibility;
+            const originalOpacity = tooltip.style.opacity;
 
-            // 2. Start with fixed columns
-            let allHeaders = [...currentFixedColumns];
+            // Temporarily reset positioning to calculate actual width
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '0';
+            tooltip.style.marginLeft = '0';   // Clear previous margin shift
+
+            // 2. Get dimensions and position
+            const computedWidth = tooltip.offsetWidth;
+            const computedHeight = tooltip.offsetHeight;
+            const cellRect = cellElement.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            const safetyMargin = 10; 
             
-            // 3. Insert Access Type at index 3 (which will be the 5th column after No. is added)
-            if (sourceMode === 'separate') { 
-                 // MODIFIED: Insert ACCESS_TYPE_HEADER at index 3 to make it the 5th overall column.
-                 if (allHeaders.length >= 3) {
-                     allHeaders.splice(3, 0, ACCESS_TYPE_HEADER); 
-                 } else {
-                     allHeaders.push(ACCESS_TYPE_HEADER);
-                 }
+            // Check if the cell is one of the last rows in the table body (Fix 7)
+            const rowElement = cellElement.closest('tr');
+            const tableBody = cellElement.closest('tbody');
+            let isLastRowNearEnd = false;
+
+            if (tableBody && rowElement) {
+                const allRows = Array.from(tableBody.children);
+                const rowIndex = allRows.indexOf(rowElement);
+                const totalRows = allRows.length;
+                
+                // If the row is within the last 5 rows, force TOP positioning (which is the new default)
+                const THRESHOLD = 5; 
+                if (totalRows - rowIndex <= THRESHOLD) {
+                    isLastRowNearEnd = true;
+                }
+            }
+
+            // 3. Vertical Positioning
+            const spaceBelow = viewportHeight - cellRect.bottom;
+            
+            // NEW LOGIC: Default is TOP. Switch to BOTTOM only if there is sufficient space BELOW AND it's not near the end of the table.
+            const shouldBeBottom = spaceBelow > computedHeight + safetyMargin && !isLastRowNearEnd;
+
+            if (shouldBeBottom) {
+                cellElement.classList.add('bottom-position');
+            } else {
+                // If space is not enough OR it's near the end, use TOP position (which is the CSS default)
+                cellElement.classList.remove('bottom-position'); 
             }
             
-            // 4. Prepend the Row Index Header
-            allHeaders.unshift(ROW_INDEX_HEADER); 
+            // 4. Horizontal Positioning
             
-            // 5. Append toggleable columns
+            const desiredRightEdge = cellRect.left + computedWidth;
+            let horizontalShift = 0; 
+            
+            if (desiredRightEdge > viewportWidth - safetyMargin) {
+                horizontalShift = (viewportWidth - safetyMargin) - desiredRightEdge;
+            }
+            
+            // 5. Apply final styles and restore visibility
+            
+            if (horizontalShift !== 0) {
+                 tooltip.style.marginLeft = horizontalShift + 'px';
+            } else {
+                 tooltip.style.marginLeft = '';
+            }
+
+            // Restore initial visibility state
+            tooltip.style.visibility = originalVisibility;
+            tooltip.style.opacity = originalOpacity;
+        }
+        // --- END Tooltip Positioning Logic ---
+
+        // --- Main Table Rendering Function ---
+        function renderTable(data, mode) {
+            resultTableDiv.innerHTML = '';
+            
+            // Retrieve current settings
+            const protocolMode = document.querySelector('input[name="protocolMode"]:checked').value;
+            const sourceMode = document.querySelector('input[name="targetSourceMode"]:checked').value;
+            const userDetailMode = document.querySelector('input[name="userDetailMode"]:checked').value; 
+
+            // 1. Determine the base set of columns
+            const currentFixedColumns = mode === 'user' ? FIXED_COLUMNS_BY_USER : FIXED_COLUMNS_BY_TARGET;
+            let allHeaders = [...currentFixedColumns];
+            
+            // Get the Host IP index 
+            const hostIPIndex = allHeaders.indexOf("Host IP");
+            
+            // Set the insertion point:
+            let insertPoint;
+            if (mode === 'target') {
+                const usernameIndex = allHeaders.indexOf("Username");
+                insertPoint = usernameIndex !== -1 ? usernameIndex + 1 : allHeaders.length;
+            } else {
+                insertPoint = hostIPIndex !== -1 ? hostIPIndex + 1 : allHeaders.length;
+            }
+
+            // 3. Insert Protocol (if separate)
+            if (protocolMode === 'separate') {
+                if (hostIPIndex !== -1) {
+                    allHeaders.splice(insertPoint, 0, PROTOCOL_HEADER);
+                    insertPoint++;
+                } else {
+                    const authIndex = allHeaders.indexOf("Authorization Name");
+                    allHeaders.splice(authIndex !== -1 ? authIndex : allHeaders.length, 0, PROTOCOL_HEADER);
+                }
+            }
+            
+            // 4. Insert Access Type (if separate)
+            if (sourceMode === 'separate') {
+                 if (hostIPIndex !== -1) {
+                    allHeaders.splice(insertPoint, 0, ACCESS_TYPE_HEADER);
+                 } else {
+                    const authIndex = allHeaders.indexOf("Authorization Name");
+                    allHeaders.splice(authIndex !== -1 ? authIndex : allHeaders.length, 0, ACCESS_TYPE_HEADER);
+                 }
+            }
+
+            // 5. Prepend the Row Index Header
+            allHeaders.unshift(ROW_INDEX_HEADER);
+
+            // 6. Append toggleable columns
             allHeaders = [...allHeaders, ...TOGGLEABLE_AUTH_HEADERS];
 
             let tableHTML = '<table>';
+
+            // --- Header Row ---
             tableHTML += '<thead><tr>';
-            
             allHeaders.forEach(header => {
-                const classKey = sanitizeHeaderForCSS(header); 
-                const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER; 
-                
+                const classKey = sanitizeHeaderForCSS(header);
+                const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER || header === PROTOCOL_HEADER;
                 let className = isFixed ? '' : `auth-col auth-col-${classKey}`;
                 
-                const isRowIndex = (header === ROW_INDEX_HEADER); 
-
+                const isRowIndex = (header === ROW_INDEX_HEADER);
                 if (isRowIndex) {
                     className += ' row-index-col';
                 }
@@ -1431,237 +1836,289 @@
                 let sortIndexHTML = '';
                 
                 const criteriaIndex = sortCriteria.findIndex(c => c.header === header);
-
-                const onClickAttribute = isRowIndex ? '' : `onclick="sortTable('${header}')"`;
-
                 if (criteriaIndex !== -1) {
-                    const direction = sortCriteria[criteriaIndex].direction;
-                    sortClass = direction === 1 ? 'asc' : 'desc';
+                    sortClass = sortCriteria[criteriaIndex].direction === 1 ? 'asc' : 'desc';
                     sortIndexHTML = `<span class="sort-index">${criteriaIndex + 1}</span>`;
-                    sortIconHTML = '<span class="sort-icon"></span>';
-                } 
-
-                tableHTML += `<th class="${className} ${sortClass}" ${onClickAttribute}>
-                                ${header} 
-                                ${!isRowIndex ? 
-                                `<span class="sort-indicator">
-                                    ${sortIndexHTML}
-                                    ${sortIconHTML}
-                                </span>
-                                <span class="sortable-icon"></span>` : ''}
+                    sortIconHTML = `<span class="sort-icon"></span>`;
+                } else {
+                     sortIconHTML = `<span class="sortable-icon"></span>`; // Default unsorted icon
+                }
+                
+                const displayHeader = header; // CHANGED
+                
+                tableHTML += `<th onclick="sortTable('${header}')" class="${className} ${sortClass} header-cell">
+                                ${sortIndexHTML}
+                                <span>${displayHeader}</span>
+                                <span class="sort-indicator">${sortIconHTML}</span>
                               </th>`;
             });
             tableHTML += '</tr></thead>';
-            
+
+            // --- Body Rows ---
             tableHTML += '<tbody>';
-            data.forEach((item, index) => { 
-                tableHTML += '<tr>';
+            data.forEach((item, rowIndex) => {
+                tableHTML += `<tr>`;
+                
                 allHeaders.forEach(header => {
-                    
                     let rawValue;
-                    
                     if (header === ROW_INDEX_HEADER) {
-                        rawValue = index + 1; 
+                        // FIX: Use the current row index + 1 for display number
+                        rawValue = rowIndex + 1; 
                     } else if (header === ACCESS_TYPE_HEADER) {
-                        rawValue = item["TargetSource"];
+                        rawValue = item["TargetSource"] || '';
+                    } else if (header === PROTOCOL_HEADER) {
+                        rawValue = item[PROTOCOL_HEADER] || '';
                     } else {
                         rawValue = item[header];
                     }
                     
                     const classKey = sanitizeHeaderForCSS(header);
-                    const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER; 
-                    
+                    const isFixed = currentFixedColumns.includes(header) || header === ACCESS_TYPE_HEADER || header === PROTOCOL_HEADER;
                     let className = isFixed ? '' : `auth-col auth-col-${classKey}`;
                     
                     if (header === ROW_INDEX_HEADER) {
                         className += ' row-index-col';
                     }
-
+                    
                     let { displayValue, colorClass } = formatValueAndGetClass(header, rawValue);
+                    let isUserCell = false; 
 
                     if (header === "Target/Resource") {
-                        const targetName = item["Target/Resource"] || '';
+                        const fullTargetString = item["Target/Resource"] || '';
                         const source = item["TargetSource"];
+                        const protocol = item[PROTOCOL_HEADER];
+                        let targetName = fullTargetString;
 
-                        if (targetName === "") {
+                        // Remove the protocol part (the right side of the colon) from display
+                        if (protocol && protocolMode !== 'integrated') {
+                            const lastColonIndex = fullTargetString.lastIndexOf(':');
+                            if (lastColonIndex !== -1) {
+                                targetName = fullTargetString.substring(0, lastColonIndex);
+                            }
+                        }
+
+                        if (fullTargetString === "") {
                             displayValue = `<span style="color: red; font-weight: bold;">No Target in Group</span>`;
                             colorClass = '';
-                        } else if (source && sourceMode === 'integrated') { 
+                        } else if (source && sourceMode === 'integrated') {
                             displayValue = `${formatValueAndGetClass(header, targetName).displayValue} <span class="target-source">(${source})</span>`;
                             colorClass = '';
                         } else {
                             displayValue = formatValueAndGetClass(header, targetName).displayValue;
                             colorClass = '';
                         }
-                    } 
-                    
-                    else if (header === ACCESS_TYPE_HEADER) { 
-                         if (rawValue === '') {
-                             displayValue = 'N/A';
-                         } else {
-                             displayValue = rawValue;
-                         }
-                         colorClass = '';
-
-                    }
-                    
-                    else if (header === "Host IP" && rawValue === '') {
-                        displayValue = '<span style="color: red; font-weight: bold;">No Host IP</span>'; 
-                        colorClass = '';
-                    }
-
-                    else if (header === "Username") {
-                        if (rawValue === "") {
-                            displayValue = `<span style="color: red; font-weight: bold;">No User in Group</span>`; 
-                            colorClass = ''; 
-                        } else if (rawValue === '') {
-                             displayValue = '[Empty Username]';
+                    } else if (header === ACCESS_TYPE_HEADER) {
+                        if (rawValue === '') {
+                            displayValue = 'N/A';
+                        } else {
+                            displayValue = rawValue;
                         }
-                    }
-                    
-                    else if (header === "Targetgroup" && rawValue === '') {
-                        displayValue = '[Empty Targetgroup]'; 
                         colorClass = '';
-                    }
+                    } else if (header === PROTOCOL_HEADER) {
+                        if (rawValue === '') {
+                            displayValue = 'N/A';
+                        } else {
+                            displayValue = rawValue;
+                        }
+                        colorClass = '';
+                    } else if (header === "Host IP" && rawValue === '') {
+                        displayValue = '<span style="color: red; font-weight: bold;">No Host IP</span>';
+                        colorClass = '';
+                    } else if (header === "Username") {
+                        if (rawValue === "") {
+                            displayValue = `<span style="color: red; font-weight: bold;">No User in Group</span>`;
+                            colorClass = '';
+                        } else if (rawValue === '') {
+                            displayValue = '[Empty Username]';
+                        } else {
+                            // --- TOOLTIP IMPLEMENTATION START --- 
+                            const userProfile = userProfileMap.get(rawValue);
+                            
+                            // Only generate tooltip if userDetailMode is 'show'
+                            if (userProfile && userDetailMode === 'show') { 
+                                isUserCell = true; 
 
-                    else if (header === "Usergroup" && rawValue === '') {
-                        displayValue = '[Empty Usergroup]'; 
-                        colorClass = '';
-                    }
-                    
-                    else if (header === "Authorization Name" && rawValue === '') {
-                        displayValue = '[Empty Auth Name]'; 
-                        colorClass = '';
-                    }
-                    
-                    else if (header === ROW_INDEX_HEADER) {
-                        colorClass = '';
-                        displayValue = rawValue; 
-                    }
+                                let tooltipContent = '';
+                                
+                                // Order fields manually
+                                const displayFieldsOrder = [
+                                    "Status", "Full name", "Profile", "Source IPs",
+                                    "Account expiration date", "Lock counter", "Last connection"
+                                ];
+                                
+                                displayFieldsOrder.forEach(field => {
+                                    let value = userProfile[field];
+                                    if (value === undefined || value === null) return;
+                                    
+                                    let valueStyle = 'color: #fff;'; 
+                                    
+                                    if (field === "Status") { 
+                                        value = value; 
+                                        if (value === 'Disabled') {
+                                            valueStyle = 'color: #ff4444; font-weight: bold;'; 
+                                        } else {
+                                            valueStyle = 'color: #33ff33; font-weight: bold;'; 
+                                        }
+                                    } else if (value === 'N/A' || value === '' || (typeof value === 'boolean' && !value) || (value === 'False' || value === 'True')) {
+                                        valueStyle = 'color: #ccc;'; 
+                                        if (value === 'False' || value === false || value === '' || value === 'N/A') {
+                                            value = 'N/A'; 
+                                        }
+                                    } else {
+                                        valueStyle = 'color: #fff;'; 
+                                    }
 
+                                    tooltipContent += `<div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                        <span class="tooltip-field-name">${field}:</span> 
+                                                        <span style="${valueStyle}">${value}</span> 
+                                                      </div>`;
+                                });
+
+                                // Inject tooltip content directly into the cell content.
+                                displayValue = `<span>${rawValue}</span> <div class="tooltiptext">${tooltipContent}</div>`;
+                            } else {
+                                displayValue = rawValue;
+                            }
+                            // --- TOOLTIP IMPLEMENTATION END --- 
+                        }
+                        colorClass = '';
+                    } else if (header === "Targetgroup" && rawValue === '') {
+                        displayValue = '[Empty Targetgroup]';
+                        colorClass = '';
+                    } else if (header === "Usergroup" && rawValue === '') {
+                        displayValue = '[Empty Usergroup]';
+                        colorClass = '';
+                    } else if (header === "Authorization Name" && rawValue === '') {
+                        displayValue = '[Empty Auth Name]';
+                        colorClass = '';
+                    } else if (header === ROW_INDEX_HEADER) {
+                        // This is where the *override* must happen
+                        const status = item["_subProtocolStatus"];
+                        if (status === "all_green") {
+                            colorClass = 'color-positive';
+                        } else if (status === "all_red") {
+                            colorClass = 'color-negative';
+                        } else if (status === "mixed") {
+                            colorClass = 'color-mixed';
+                        } else {
+                            colorClass = ''; // No color
+                        }
+                        displayValue = rawValue; // Set display value
+                    }
 
                     let finalClassName = `${className} ${colorClass}`;
+                    let onMouseOverAttribute = '';
+                    
+                    if (isUserCell) { 
+                        finalClassName += ' user-cell'; 
+                        // Pass 'this' (the TD element) to the positioning function
+                        onMouseOverAttribute = `onmouseover="positionTooltip(this)"`;
+                    }
 
-                    tableHTML += `<td class="${finalClassName}">${displayValue}</td>`;
+                    tableHTML += `<td class="${finalClassName}" ${onMouseOverAttribute}>${displayValue}</td>`;
                 });
                 tableHTML += '</tr>';
             });
-
-            tableHTML += '</tbody></table>';
             
+            tableHTML += '</tbody></table>';
+
             if (data.length === 0 && rawAccessList.length > 0) {
-                resultTableDiv.innerHTML = '<p class="info">No results found with the current filters.</p>';
-                rowCountDisplay.innerHTML = `Total rows displayed: 0 / ${rawAccessList.length}`;
+                 resultTableDiv.innerHTML = '<p class="info">No results found with the current filters.</p>';
+                 rowCountDisplay.innerHTML = `Total rows displayed: 0 / ${rawAccessList.length}`;
+            } else if (data.length === 0 && rawAccessList.length === 0) {
+                 resultTableDiv.innerHTML = '<p class="info">The uploaded data resulted in an empty access list. Check if authorizations and group memberships are properly defined.</p>';
+                 rowCountDisplay.innerHTML = '';
             } else {
                 resultTableDiv.innerHTML = tableHTML;
                 rowCountDisplay.innerHTML = `Total rows displayed: ${data.length} / ${rawAccessList.length}`;
             }
 
-            
+            // Restore visibility of optional columns based on current state
             TOGGLEABLE_AUTH_HEADERS.forEach(header => {
+                const classKey = sanitizeHeaderForCSS(header);
                 const checkbox = document.querySelector(`#checkbox-options input[data-header="${header}"]`);
                 if (checkbox) {
-                    toggleAuthColumn(checkbox); 
+                    toggleAuthColumn(checkbox);
                 }
             });
-            console.log('Table rendering complete.');
         }
 
-        // --- Toggle Authorization Columns Visibility ---
-        function toggleAuthColumn(checkbox) {
-            const header = checkbox.dataset.header;
-            const classKey = sanitizeHeaderForCSS(header);
-            const className = `auth-col-${classKey}`;
-            
-            const elements = document.querySelectorAll(`.${className}`);
-            
-            elements.forEach(el => {
-                if (checkbox.checked) {
-                    el.style.display = 'table-cell';
-                } else {
-                    el.style.display = 'none';
-                }
-            });
-        }
-        
-        // --- Theme Change Logic ---
+        // --- Theme Toggle Logic ---
         function handleThemeChange() {
             const toggle = document.getElementById('theme-mode-toggle');
             const mode = toggle.checked ? 'dark' : 'light';
+            
             const boundaryDivs = document.querySelectorAll('#view-mode-controls > div');
             
             if (mode === 'dark') {
                 document.body.classList.add('dark-mode');
                 localStorage.setItem('theme', 'dark');
                 boundaryDivs.forEach(div => {
-                   if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--dark-border)';
+                    if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--dark-border)';
+                    if (div.style.borderTopColor !== 'transparent') div.style.borderTopColor = 'var(--dark-border)';
                 });
             } else {
                 document.body.classList.remove('dark-mode');
                 localStorage.setItem('theme', 'light');
-                 boundaryDivs.forEach(div => {
-                   if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--light-border)';
+                boundaryDivs.forEach(div => {
+                    if (div.style.borderBottomColor !== 'transparent') div.style.borderBottomColor = 'var(--light-border)';
+                    if (div.style.borderTopColor !== 'transparent') div.style.borderTopColor = 'var(--light-border)';
                 });
             }
             console.log(`Theme switched to ${mode} mode.`);
         }
-        
-        // --- Initialization on DOM Load (The Fix) ---
+
+        // --- Initialization on DOM Load ---
         document.addEventListener('DOMContentLoaded', () => {
-             console.log('DOM Content Loaded. Initializing.');
-             
-             // 1. Assign DOM Elements
-             dropArea = document.getElementById('drop-area');
-             fileElem = document.getElementById('fileElem');
-             fileListUL = document.getElementById('uploaded-files-ul');
-             controlPanelContainerDiv = document.getElementById('control-panel-container');
-             resultTableDiv = document.getElementById('result-table');
-             checkboxOptionsDiv = document.getElementById('checkbox-options');
-             viewModeOptionsDiv = document.getElementById('view-mode-options');
-             filterControlsDiv = document.getElementById('filter-controls');
-             exportInstructionsDiv = document.getElementById('export-instructions');
-             rowCountDisplay = document.getElementById('row-count-display');
-             unusedEntitiesControlsDiv = document.getElementById('unused-entities-controls'); // NEW
-             unusedEntitiesContentDiv = document.getElementById('unused-entities-content'); // NEW
+            console.log('DOM Content Loaded. Initializing.');
+            
+            // 1. Assign DOM Elements
+            dropArea = document.getElementById('drop-area');
+            fileElem = document.getElementById('fileElem');
+            fileListUL = document.getElementById('uploaded-files-ul');
+            controlPanelContainerDiv = document.getElementById('control-panel-container');
+            resultTableDiv = document.getElementById('result-table');
+            checkboxOptionsDiv = document.getElementById('checkbox-options');
+            viewModeOptionsDiv = document.getElementById('view-mode-options');
+            filterControlsDiv = document.getElementById('filter-controls');
+            exportInstructionsDiv = document.getElementById('export-instructions');
+            rowCountDisplay = document.getElementById('row-count-display');
+            unusedEntitiesControlsDiv = document.getElementById('unused-entities-controls');
+            unusedEntitiesContentDiv = document.getElementById('unused-entities-content');
+            
+            // 2. Load Theme from localStorage
+            const toggle = document.getElementById('theme-mode-toggle');
+            const savedTheme = localStorage.getItem('theme'); 
+            if (savedTheme === 'dark') {
+                toggle.checked = true;
+            }
+            handleThemeChange(); 
 
+            // 3. Setup Drag and Drop Listeners
+            function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+            function highlight() { dropArea.classList.add('highlight'); }
+            function unhighlight() { dropArea.classList.remove('highlight'); }
+            function handleDrop(e) { 
+                let dt = e.dataTransfer; 
+                let files = dt.files; 
+                handleFiles(files); 
+            }
 
-             // Initial state setup
-             controlPanelContainerDiv.style.display = 'none';
-
-             // 2. Setup Theme
-             const savedTheme = localStorage.getItem('theme') || 'light';
-             const toggle = document.getElementById('theme-mode-toggle');
-             
-             if (savedTheme === 'dark') {
-                 toggle.checked = true;
-             }
-             handleThemeChange(); 
-
-             // 3. Setup Drag and Drop Listeners
-             function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-             function highlight() { dropArea.classList.add('highlight'); }
-             function unhighlight() { dropArea.classList.remove('highlight'); }
-             function handleDrop(e) { 
-                 let dt = e.dataTransfer; 
-                 let files = dt.files; 
-                 handleFiles(files); 
-             }
-
-             dropArea.addEventListener('click', () => fileElem.click());
-             fileElem.addEventListener('change', (e) => handleFiles(e.target.files));
-             
-             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                 dropArea.addEventListener(eventName, preventDefaults, false);
-             });
-             ['dragenter', 'dragover'].forEach(eventName => {
-                 dropArea.addEventListener(eventName, highlight, false);
-             });
-             ['dragleave', 'drop'].forEach(eventName => {
-                 dropArea.addEventListener(eventName, unhighlight, false);
-             });
-             dropArea.addEventListener('drop', handleDrop, false);
-             
-             console.log('Initialization complete. Awaiting file drop.');
+            dropArea.addEventListener('click', () => fileElem.click());
+            fileElem.addEventListener('change', (e) => handleFiles(e.target.files));
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+            dropArea.addEventListener('drop', handleDrop, false);
+            
+            console.log('Initialization complete. Awaiting file drop.');
         });
         
     </script>
