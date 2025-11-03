@@ -167,3 +167,12 @@ This section lists **every single access entry**, independent of User Groups and
 
 The **Total rows displayed** section shows the number of records currently visible in the table (based on applied filters) out of the total number of access entries in the system.
 
+## 📸 Screenshots
+
+![](screenshots/WABACL%20(1).png)
+![](screenshots/WABACL%20(2).png)
+![](screenshots/WABACL%20(3).png)
+![](screenshots/WABACL%20(4).png)
+![](screenshots/WABACL%20(5).png)
+
+
