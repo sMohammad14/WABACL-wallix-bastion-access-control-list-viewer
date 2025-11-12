@@ -135,6 +135,22 @@
 - رنگ قرمز: تمام پروتکل‌های اعمال شده به یک **`Device`** که تحت یک **`Service`** در یک **`Target Group`** اضافه شده است، در **`Authorization`** این دسترسی غیرمجاز است.  
 - رنگ زرد: برخی پروتکل‌های اعمال شده به یک **`Device`** که تحت یک **`Service`** در یک **`Target Group`** اضافه شده است، در **`Authorization`** این دسترسی مجاز است و برخی غیرمجاز است. با تیک زدن **`Sub-protocols`** از قسمت **`Optional Columns`** مشاهده خواهید کرد کدام دسترسی‌های منتسب به **`Device`** و **`Service`** آن که در **`Target Group`** آمده، در **`Authorization`** مجاز است **`سبز`** و کدام غیرمجاز **`قرمز`**.
 
+  ## 📸تصاویر
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(1).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(2).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(3).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(4).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(5).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(6).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(7).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(8).png)
 
 ---
 ---
@@ -265,3 +281,20 @@ Headers support multi-level sorting: sort by one column, then another, etc. The 
 - Green: All protocols applied to a **`Device`** under a **`Service`** in a **`Target Group`** are allowed in **`Authorization`**.  
 - Red: All protocols applied are not allowed.  
 - Yellow: Some protocols are allowed, some are not. Ticking **`Sub-protocols`** in **`Optional Columns`** shows which are green and which are red.
+
+  ## Screenshots
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(1).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(2).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(3).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(4).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(5).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(6).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(7).png)
+
+![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(8).png)
