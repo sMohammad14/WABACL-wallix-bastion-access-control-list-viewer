@@ -1,0 +1,15 @@
+#wab authorization
+#Name;Usergroup name;Targetgroup name;Sub-protocols;Critical;Recorded;User access;Proxy access;Description;Require approval;Has comment;Comment mandatory;Has ticket;Ticket mandatory;Approver groups;Active quorum;Inactive quorum;Single connection;Approval timeout
+all_users_TO_all_account__FULL;devops;all_accounts;SSH_SHELL_SESSION,SSH_REMOTE_COMMAND,SSH_SCP_UP,SSH_SCP_DOWN,SSH_X11,SFTP_SESSION,RDP,VNC,TELNET,RLOGIN,SSH_DIRECT_TCPIP,SSH_REVERSE_TCPIP,SSH_AUTH_AGENT,SSH_DIRECT_UNIXSOCK,SSH_REVERSE_UNIXSOCK,RAWTCPIP,RDP_CLIPBOARD_UP,RDP_CLIPBOARD_DOWN,RDP_PRINTER,RDP_COM_PORT,RDP_DRIVE,RDP_SMARTCARD,RDP_CLIPBOARD_FILE,RDP_AUDIO_OUTPUT,RDP_AUDIO_INPUT;False;True;True;True;;False;False;False;False;False;;-1;-1;False;0
+manager_TO_mix_RDP;manager;mix_server;RDP,RDP_CLIPBOARD_UP,RDP_CLIPBOARD_DOWN,RDP_PRINTER,RDP_COM_PORT,RDP_DRIVE,RDP_SMARTCARD,RDP_CLIPBOARD_FILE,RDP_AUDIO_OUTPUT,RDP_AUDIO_INPUT;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+empty_to_empty__SSH;empty_user_group_1;empty_target_group_1;SSH_DIRECT_TCPIP;False;True;True;True;;False;False;False;False;False;;-1;-1;False;0
+security_TO_rdp__RAWTCP;security;rdp_servers_account_mapping;RAWTCPIP;False;True;True;True;;False;False;False;False;False;;-1;-1;False;0
+web_TO_mix_FULL_approver;web;mix_server;SSH_SHELL_SESSION,SSH_REMOTE_COMMAND,SSH_SCP_UP,SSH_SCP_DOWN,SSH_X11,SFTP_SESSION,RDP,VNC,TELNET,RLOGIN,SSH_DIRECT_TCPIP,SSH_REVERSE_TCPIP,SSH_AUTH_AGENT,SSH_DIRECT_UNIXSOCK,SSH_REVERSE_UNIXSOCK,RAWTCPIP,RDP_CLIPBOARD_UP,RDP_CLIPBOARD_DOWN,RDP_PRINTER,RDP_COM_PORT,RDP_DRIVE,RDP_SMARTCARD,RDP_CLIPBOARD_FILE,RDP_AUDIO_OUTPUT,RDP_AUDIO_INPUT;True;True;True;True;;True;False;False;False;False;firewall,alex_user_group;1;1;False;1
+firewall_TO_all_interactive_not_access_in_acl;firewall;all_interactive;SSH_X11,TELNET,SSH_DIRECT_TCPIP,SSH_REVERSE_TCPIP,SSH_AUTH_AGENT,SSH_DIRECT_UNIXSOCK,SSH_REVERSE_UNIXSOCK;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+empty2_TO_rdp_RDP;empty_user_group_2;rdp_servers_interactive;RDP;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+sec_TO_empty2;security;empty_target_gruop_2;SFTP_SESSION;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+alex_clinet_RDP_only;alex_user_group;alex_clinet_pc_RDP-SSH_only;RDP,RDP_CLIPBOARD_DOWN,RDP_DRIVE;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+alex_clinet_RDP_only_1;alex_user_group;alex_clinet_pc_RDP_only;SSH_X11,SFTP_SESSION;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0
+alex_clinet_SSH_TELNET;alex_user_group;alex_clinet_pc_TELNET_only;TELNET,SSH_AUTH_AGENT;False;True;True;True;;False;False;False;False;False;;-1;-1;False;0
+nouserTOnotarget;nousserGP;notargetGP;SFTP_SESSION;False;True;True;True;;False;False;False;False;False;;-1;-1;False;0
+subACL;devops;subgp;VNC;False;False;True;True;;False;False;False;False;False;;-1;-1;False;0

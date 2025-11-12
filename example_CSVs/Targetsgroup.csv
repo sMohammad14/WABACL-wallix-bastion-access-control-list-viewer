@@ -1,0 +1,17 @@
+#wab targetsgroup
+#Name;Description;Target accounts;Account mapping;Interactive login;Accounts;Scenario
+alex_clinet_pc_RDP_only;;;alex_client:RDP;DUPLICATE:RDP;;
+alex_clinet_pc_RDP-SSH_only;;;;alex_client:RDP,alex_client:SSH;;
+alex_clinet_pc_TELNET_only;;;alex_client:TELNET_clinet;;;
+all_accounts;;root@local@ssh_server:SSH,admin@local@rdp_server_full:RDP;;;;
+all_interactive;;;;vnc_server:VNC,vcn_server_double_port:VNC_seceond,vnc_server_new:VNC,vnc_server_new:VNC_new,rdp_server_full:RDP,rdp_server_no_drive:RDP,mix_protocol_server:VNC,mix_protocol_server:RDP_no_1,mix_protocol_server:RDP_no_2,mix_protocol_server:RLOGIN,mix_protocol_server:SSH,ssh_server:SSH,DUPLICATE:RDP;;
+empty_target_group_1;;;;;;
+empty_target_gruop_2;;;;;;
+mix_server;;;mix_protocol_server:VNC,mix_protocol_server:RDP_no_1,mix_protocol_server:RDP_no_2,mix_protocol_server:RLOGIN,mix_protocol_server:SSH;;;
+no_acl_targetgroup;;;server_in_targetgroup_but_no_acl:RLOGIN;;;
+notargetGP;;;;;;
+only_one_target;;;only_one_target:SSH;;;
+rdp_servers_account;;admin@local@rdp_server_full:RDP;DUPLICATE:RDP;;;
+rdp_servers_account_mapping;;;rdp_server_full:RDP,rdp_server_no_drive:RDP,mix_protocol_server:RDP_no_1,mix_protocol_server:RDP_no_2;;;
+rdp_servers_interactive;;;;rdp_server_no_drive:RDP,mix_protocol_server:RDP_no_1,mix_protocol_server:RDP_no_2;;
+subgp;;;;;;

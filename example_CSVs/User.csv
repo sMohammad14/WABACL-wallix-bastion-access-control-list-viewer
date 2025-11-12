@@ -1,0 +1,15 @@
+#wab user
+#Username;Groups;Full name;Source IPs;Profile;Account expiration date;User authentications;Public key;Password;Email;Force change password;Lock counter;Last connection;Preferred language;Certificate DN;Disabled
+admin;only_one_user;Product Super Administrator;;product_administrator;;local_password;;[hidden];;False;0;;en;;False
+alex;alex_user_group;;;auditor;;local_password;;[hidden];alex@mail.net;False;0;;en;;False
+alice;firewall,security;;;user;;local_password;;[hidden];alice@mail.net;False;0;;en;;False
+bob;firewall;;;user;;local_password;;[hidden];bob@mail.net;False;0;;en;;False
+emma;web;;;approver;;local_password;;[hidden];emma@mail.net;False;0;;en;;True
+henry;web,security;;;approver;;local_password;;[hidden];henry@mail.net;False;0;;en;;False
+isabella;devops;;;product_administrator;2025-11-19 23:44;local_password;;[hidden];isabella@mail.net;False;0;;en;;False
+jack;devops;;;product_administrator;;local_password;;[hidden];jack@mail.net;False;0;;en;;False
+luna;manager,security;;;auditor;;local_password;;[hidden];luna@mail.net;False;0;;en;;False
+no_usergroup_user;;;;operation_administrator;;local_password;;[hidden];user1@mail.net;False;0;;en;;False
+oliver;manager;;;operation_administrator;;local_password;;[hidden];oliver@mail.net;False;0;;en;;False
+sophia;security;;;system_administrator;;local_password;;[hidden];sophia@mail.net;False;0;;en;;False
+user_in_empty_usergroup;empty_user_group_1;;;operation_administrator;;local_password;;[hidden];user2@mail.net;False;0;;en;;False

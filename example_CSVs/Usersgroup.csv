@@ -1,0 +1,12 @@
+#wab usersgroup
+#Name;Description;Profile;Timeframes;Users
+alex_user_group;;;allthetime;alex
+devops;;;allthetime;jack,isabella
+empty_user_group_1;;;allthetime;user_in_empty_usergroup
+empty_user_group_2;;;allthetime;
+firewall;;;allthetime;alice,bob
+manager;;;allthetime;oliver,luna
+nousserGP;;;allthetime;
+only_one_user;;;allthetime;admin
+security;;;allthetime;alice,henry,sophia,luna
+web;;;allthetime;henry,emma
