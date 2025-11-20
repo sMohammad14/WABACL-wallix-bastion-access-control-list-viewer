@@ -1,4 +1,10 @@
 # فارسی
+
+---
+
+#### ⚙️ آخرین تغییرات نسخه 2.5.1 - 20-11-2025
+
+##### اصلاح: هدر جدول نهایی به‌صورت sticky اصلاح شد تا هنگام اسکرول همیشه قابل‌مشاهده بماند.
 ---
 ## 🌟معرفی
  برنامه **`SPA (Single-Page Application)`** ارائه شده در یک تک فایل **`HTML`** به صورت **`Offline`**. بدون نیاز به **`کتابخانه`**، **`وابستگی`** و **`نصب`**.
@@ -155,7 +161,12 @@
 ---
 ---
 # English
+---
 
+#### ⚙️ Latest changes version 2.5.1 — 2025-11-20
+
+##### FIX: Final table header made sticky so it remains visible while scrolling.
+---
 ## 🌟Overview
 The **`SPA (Single-Page Application)`** is provided as a single **`HTML`** file and works completely **`Offline`**. No **`libraries`**, **`dependencies`**, or **`installation`** are required.
 
