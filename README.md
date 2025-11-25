@@ -2,9 +2,9 @@
 
 ---
 
-#### ⚙️ آخرین تغییرات نسخه 2.5.1 - 20-11-2025
-
-##### اصلاح: هدر جدول نهایی به‌صورت sticky اصلاح شد تا هنگام اسکرول همیشه قابل‌مشاهده بماند.
+#### ⚙️ آخرین تغییرات نسخه 2.5.3 - 25-11-2025
+##### با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities آیتم کلیک شده در کلیپ برد کپی خواهد شد.پ
+##### قابلیت جست و جو برای تمام باکس ها اضافه شد.
 ---
 ## 🌟معرفی
  برنامه **`SPA (Single-Page Application)`** ارائه شده در یک تک فایل **`HTML`** به صورت **`Offline`**. بدون نیاز به **`کتابخانه`**، **`وابستگی`** و **`نصب`**.
@@ -163,9 +163,11 @@
 # English
 ---
 
-#### ⚙️ Latest changes version 2.5.1 — 2025-11-20
+#### ⚙️ Latest changes version 2.5.3 — 2025-11-25
 
-##### FIX: Final table header made sticky so it remains visible while scrolling.
+##### By clicking on the items inside the boxes in the Ungrouped Entities section, the clicked item will be copied to the clipboard.
+##### A search feature has been added for all boxes.
+
 ---
 ## 🌟Overview
 The **`SPA (Single-Page Application)`** is provided as a single **`HTML`** file and works completely **`Offline`**. No **`libraries`**, **`dependencies`**, or **`installation`** are required.
