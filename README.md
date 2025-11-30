@@ -1,10 +1,15 @@
 # فارسی
 
 ---
+#### ⚙️ آخرین تغییرات نسخه 2.5.6 - 30-11-2025
+ - با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities و برخی سلول های جدول نهایی آیتم کلیک شده در کلیپ برد کپی خواهد شد. با نگه داشتن ماوس روی موارد قابل کپی، پیام مناسب نمایش داده خواهد شد.
+ - موارد فیلتر شده در تمام باکس ها به ابتدای لیست مربوطه رفته و Sort میشود. 
+ - برخی رنگ های با هدف تجربه کاربری بهتر، تغییر کرد.
+
 
 #### ⚙️ آخرین تغییرات نسخه 2.5.3 - 25-11-2025
-##### با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities آیتم کلیک شده در کلیپ برد کپی خواهد شد.پ
-##### قابلیت جست و جو برای تمام باکس ها اضافه شد.
+ - با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities آیتم کلیک شده در کلیپ برد کپی خواهد شد.پ
+ - قابلیت جست و جو برای تمام باکس ها اضافه شد.
 ---
 ## 🌟معرفی
  برنامه **`SPA (Single-Page Application)`** ارائه شده در یک تک فایل **`HTML`** به صورت **`Offline`**. بدون نیاز به **`کتابخانه`**، **`وابستگی`** و **`نصب`**.
@@ -163,10 +168,17 @@
 # English
 ---
 
-#### ⚙️ Latest changes version 2.5.3 — 2025-11-25
+#### ⚙️ Release Notes v2.5.6 - 30-11-2025
+- Clicking on items inside the Ungrouped Entities boxes and certain cells in the final table will copy the clicked item to the clipboard. When hovering over copyable items, an appropriate tooltip message will be displayed.
 
-##### By clicking on the items inside the boxes in the Ungrouped Entities section, the clicked item will be copied to the clipboard.
-##### A search feature has been added for all boxes.
+- Filtered items in all boxes are now moved to the top of their respective lists and sorted.
+
+- Some colors have been updated to improve user experience.
+
+#### ⚙️ Release Notes v2.5.3 - 25-11-2025
+- Clicking on items inside the Ungrouped Entities boxes will copy the clicked item to the clipboard.
+
+- Search functionality has been added for all boxes.
 
 ---
 ## 🌟Overview
