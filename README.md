@@ -1,11 +1,16 @@
 # فارسی
+---
+#### ⚙️ آخرین تغییرات نسخه 2.5.9 - 03-12-2025
+ - اکنون میتوانید گروه های کاربری و گروه های سرور را که در هیچ Authorization شرکت ندارند را مشاهده نمایید.
+ - با کلیک روی هر سطر (یا کپس یکی از سلول های آن سطر) تمام آن ردیف Bold خواهد شد.
+ - رنگ آمیزی زرد به Sub-protocols هر ردیف اضافه شد. اگر در یک ردیف Sub-protocols زرد مشاهده گردید، یعنی آن Sub-protocols به تارگت آن ردیف منتسب نشده ولی در آن Authorization برای حداقل یک تارگت دیگر استفاده میشود. 
 
 ---
 #### ⚙️ آخرین تغییرات نسخه 2.5.6 - 30-11-2025
  - با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities و برخی سلول های جدول نهایی آیتم کلیک شده در کلیپ برد کپی خواهد شد. با نگه داشتن ماوس روی موارد قابل کپی، پیام مناسب نمایش داده خواهد شد.
  - موارد فیلتر شده در تمام باکس ها به ابتدای لیست مربوطه رفته و Sort میشود. 
  - برخی رنگ های با هدف تجربه کاربری بهتر، تغییر کرد.
-
+---
 
 #### ⚙️ آخرین تغییرات نسخه 2.5.3 - 25-11-2025
  - با کلیک روی آیتم های درون باکس های قسمت Ungrouped Entities آیتم کلیک شده در کلیپ برد کپی خواهد شد.پ
@@ -164,16 +169,23 @@
 ![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(8).png)
 
 ---
----
 # English
 ---
 
+
+ #### ⚙️ Release Notes v2.5.6 - 30-11-2025
+ - You can now view user groups and server groups that do not participate in any Authorization.
+ - Clicking any row (or clicking one of that row's cells) will make the entire row **bold**.
+ - Yellow highlighting was added to each row's Sub-protocols. If yellow Sub-protocols are seen in a row, it means those Sub-protocols are not assigned to that row's target but are used in that Authorization for at least one other target.
+---
 #### ⚙️ Release Notes v2.5.6 - 30-11-2025
 - Clicking on items inside the Ungrouped Entities boxes and certain cells in the final table will copy the clicked item to the clipboard. When hovering over copyable items, an appropriate tooltip message will be displayed.
 
 - Filtered items in all boxes are now moved to the top of their respective lists and sorted.
 
 - Some colors have been updated to improve user experience.
+
+---
 
 #### ⚙️ Release Notes v2.5.3 - 25-11-2025
 - Clicking on items inside the Ungrouped Entities boxes will copy the clicked item to the clipboard.
