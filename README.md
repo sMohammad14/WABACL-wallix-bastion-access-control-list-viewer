@@ -1,5 +1,9 @@
 # فارسی
 ---
+#### ⚙️ آخرین تغییرات نسخه 2.5.10 - 2025/06/12
+- هم اکنون میتواند تمام موارد را در باکس مربوطه جست و جو کنید، حتی مواردی که در یک دسترسی شرکت ندارد.
+- الگوریتم برنامه تغییر و استفاده از منابع بهینه شد.
+---
 #### ⚙️ آخرین تغییرات نسخه 2.5.9 - 03-12-2025
  - اکنون میتوانید گروه های کاربری و گروه های سرور را که در هیچ Authorization شرکت ندارند را مشاهده نمایید.
  - با کلیک روی هر سطر (یا کپس یکی از سلول های آن سطر) تمام آن ردیف Bold خواهد شد.
@@ -168,12 +172,14 @@
 
 ![WABACL v2.5.0 (1)](./screenshots/WABACL-v2.5.0%20(8).png)
 
----
+
 # English
 ---
-
-
- #### ⚙️ Release Notes v2.5.6 - 30-11-2025
+#### ⚙️ Release Notes v2.5.10 - 06-12-2025
+- You can now search all items in the relevant box, including items that are not covered by a given access.
+- The application's algorithm has been updated and resource usage optimized.
+---
+ #### ⚙️ Release Notes v2.5.9 - 03-12-2025
  - You can now view user groups and server groups that do not participate in any Authorization.
  - Clicking any row (or clicking one of that row's cells) will make the entire row **bold**.
  - Yellow highlighting was added to each row's Sub-protocols. If yellow Sub-protocols are seen in a row, it means those Sub-protocols are not assigned to that row's target but are used in that Authorization for at least one other target.
